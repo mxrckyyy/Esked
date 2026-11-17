@@ -17,6 +17,11 @@ beautiful, readable, high-resolution phone wallpapers.
 - `npm test` — run unit tests
 - `npm run lint` — lint
 
+## Current Implementation Status
+
+Phase 0 only: project scaffold and documentation. No schedule, customization, template,
+rendering, or export features are implemented yet.
+
 ## Privacy
 
 All schedule data stays on the user's device. No backend, no accounts, no analytics.

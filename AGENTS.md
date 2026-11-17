@@ -1,0 +1,456 @@
+# AGENTS.md — Esked
+
+> Mandatory reading for every OpenCode session working on this repository.
+> Read this file before doing any project work. Then inspect the repository and Git status,
+> review recent changes, compare documented progress with actual implementation, and verify
+> tests/builds instead of trusting previous reports.
+
+---
+
+## 1. Project Identity and Product Overview
+
+- **Product name:** Esked
+- **Type:** Free, offline-first Progressive Web App (PWA)
+- **Purpose:** Convert students' class schedules into beautiful, readable, high-resolution
+  phone wallpapers.
+- **Core value:** A student can add subjects and schedules, customize, pick a template/theme,
+  preview, and download/share a PNG wallpaper in under two minutes.
+- **Privacy:** All schedule data stays on the user's device. No backend, no accounts, no
+  cloud database, no analytics by default, no paid API.
+- **Target devices:** Android phones, iPhones, desktop browsers, tablets.
+- **Target viewports:** 320px to 1920px.
+
+## 2. Problem Statement and Target Users
+
+**Problem:** Students often need a quick, glanceable view of their weekly class schedule on
+their phone lock/home screen. Manually designing a wallpaper is tedious; existing tools are
+heavy, online-only, or require accounts.
+
+**Target users:** Students (high school / college) who want a clean schedule wallpaper
+without creating accounts or uploading personal data.
+
+## 3. Product Goals, MVP Scope, Non-Goals, Future Features
+
+### Goals
+- Offline-capable after first successful visit.
+- Fast end-to-end flow (under 2 minutes).
+- High-resolution PNG export suitable for phone wallpapers.
+- Accessible, responsive, touch-friendly.
+
+### MVP scope (planned)
+- Add/edit/delete subjects with schedules (day, start/end time, room, color, notes).
+- Customize days, times, rooms, colors, and other info.
+- Select a wallpaper template and theme.
+- Preview wallpaper.
+- Download or share generated PNG.
+- Local persistence via IndexedDB with in-memory fallback.
+
+### Non-goals
+- No backend, authentication, cloud sync, or multi-user support.
+- No analytics by default.
+- No paid services.
+
+### Future features (not in MVP)
+- Import/export schedule data (JSON) with validation.
+- Multiple wallpaper sizes/resolutions presets.
+- Additional templates and themes.
+- Localization beyond base language.
+- Print-friendly export.
+
+## 4. Complete Technology Stack
+
+- React 18
+- Vite (v8.x in current scaffold)
+- JavaScript (ES6+) + JSX (no TypeScript)
+- Tailwind CSS v4 (via @tailwindcss/vite)
+- vite-plugin-pwa + Workbox (service worker, precaching)
+- IndexedDB via `idb`
+- HTML5 Canvas API
+- Vitest + React Testing Library + jsdom
+- Lucide React optional (avoid unnecessary deps)
+- crypto.randomUUID() for IDs (with fallback)
+
+No backend, no auth, no cloud DB, no paid API.
+
+## 5. System Architecture
+
+Layers (keep separated):
+- **UI** (`src/components/`, `src/App.jsx`): rendering, interaction, accessibility.
+- **State/hooks** (`src/hooks/`): reusable stateful behavior.
+- **Business logic** (`src/lib/`): pure functions, no React.
+- **Storage** (`src/storage/`): IndexedDB access + in-memory fallback.
+- **Rendering** (`src/rendering/`): Canvas wallpaper generation and PNG export.
+
+Data flow: UI -> hooks -> lib (validation/transform) -> storage (persist) -> rendering (canvas).
+
+All schedule data remains local.
+
+## 6. Complete Schedule Data Model
+
+Planned entities:
+
+### Subject
+```
+{
+  id: string (uuid),
+  name: string,
+  color: string (hex),
+  notes: string (optional),
+  createdAt: number,
+  updatedAt: number
+}
+```
+
+### ScheduleEntry (a subject's time slot)
+```
+{
+  id: string (uuid),
+  subjectId: string,
+  day: 0..6 (0=Sunday or configurable; document chosen convention),
+  startTime: string ("HH:mm"),
+  endTime: string ("HH:mm"),
+  room: string (optional),
+  notes: string (optional)
+}
+```
+
+### WallpaperSettings (user preferences)
+```
+{
+  templateId: string,
+  themeId: string,
+  width: number,
+  height: number,
+  showRoom: boolean,
+  showNotes: boolean,
+  ...
+}
+```
+
+### AppSettings
+```
+{
+  id: "app",
+  lastRoute: string (optional),
+  ...
+}
+```
+
+IDs via crypto.randomUUID() with fallback. Validate all inputs. No mutation of state.
+
+## 7. IndexedDB Database Structure
+
+Planned (database name: `esked`, version 1):
+
+Object stores:
+- `subjects` (keyPath: `id`)
+- `scheduleEntries` (keyPath: `id`, index `by-subject` on subjectId, index `by-day` on day)
+- `settings` (keyPath: `id`)
+
+In-memory fallback when IndexedDB unavailable, with user notice that changes may not persist.
+
+Storage failures handled gracefully (try/catch, surface error state).
+
+## 8. Design System and Color Tokens
+
+Modern, minimal, polished, student-friendly. Mobile-first. High contrast. Touch targets >= 44x44px.
+
+Color tokens (planned, to be finalized in code):
+- Neutral slate scale for UI chrome (slate-50..900).
+- Accent: slate-900 for primary actions.
+- Subject colors: user-selectable palette (to be defined).
+- Wallpaper themes: light/dark variants.
+
+Spacing: Tailwind default scale. Rounded corners (lg). Subtle borders/shadows.
+
+Avoid excessive gradients/glassmorphism/decoration/animations.
+
+## 9. UI/UX Requirements and Screen Inventory
+
+Screens (planned):
+1. **Home / Schedule** — list of subjects and entries; add/edit/delete.
+2. **Subject Form** — create/edit subject (name, color, notes) + schedule slots.
+3. **Customize** — days, times, rooms, colors, display options.
+4. **Template Picker** — choose wallpaper template + theme.
+5. **Preview** — render wallpaper preview.
+6. **Export** — download/share PNG.
+
+States required: loading, empty, error, success. Responsive 320–1920px. Semantic HTML, ARIA.
+
+## 10. Wallpaper Template Specifications
+
+Planned templates (initial set):
+- **Classic Grid** — days as columns, time slots as rows.
+- **Compact List** — vertical list grouped by day.
+- **Minimal** — clean, large typography, few details.
+
+Each template supports theme (light/dark) and configurable density. Rendered via Canvas at target resolution.
+
+## 11. User Flows
+
+Primary flow:
+1. Open Esked.
+2. Add subjects and schedules.
+3. Customize days/times/rooms/colors.
+4. Select template + theme.
+5. Preview.
+6. Download or share PNG.
+
+Under 2 minutes target.
+
+## 12. Canvas Rendering and Export Requirements
+
+- Use HTML5 Canvas API.
+- Render at high resolution (device pixel ratio aware, configurable target dimensions).
+- Export PNG via canvas.toBlob / toDataURL.
+- Download via anchor download; share via Web Share API when available (with fallback).
+- Clean up object URLs.
+- Handle rendering errors gracefully.
+
+## 13. PWA and Offline Requirements
+
+- vite-plugin-pwa with Workbox generateSW.
+- registerType: autoUpdate.
+- Standalone display, start_url "/", scope "/".
+- Precache app shell + assets.
+- Offline fallback to cached index.html (navigation route).
+- Manifest name/short_name "Esked", theme #0f172a, background #ffffff.
+- Icons: currently SVG (favicon.svg) for any/maskable. Limitation: some platforms prefer PNG (documented). Not auto-replaced.
+
+Offline behavior must be verified manually (not assumed from SW generation).
+
+## 14. Parser Requirements and Supported Input Formats
+
+Future import functionality (not in MVP): parse schedule data from text/CSV/JSON with validation.
+- Validate imported data before accepting.
+- Reject malformed entries with clear errors.
+- No network transmission.
+
+## 15. Edge Cases and Error Handling
+
+- IndexedDB unavailable -> in-memory fallback + user notice.
+- Storage quota exceeded -> surface error, avoid data loss.
+- Invalid time ranges (end <= start) -> validation error.
+- Overlapping schedule entries -> warn or allow (decide later; default warn).
+- Empty schedule -> empty state UI.
+- Canvas export failure -> error message + retry.
+- Web Share unsupported -> download fallback.
+- Offline first visit -> cannot work offline until cached; inform user.
+
+## 16. Testing Strategy and Acceptance Criteria
+
+- Vitest unit tests for pure logic (lib, storage adapters, rendering helpers).
+- React Testing Library for components.
+- Integration tests for flows where feasible.
+- Accessibility checks (semantic HTML, ARIA, keyboard).
+- Responsive layout checks.
+- Build + lint in CI/local.
+
+Acceptance: tests pass, lint clean, build succeeds, no console errors, PWA manifest valid.
+
+## 17. Complete Phase 0–8 Roadmap
+
+- **Phase 0 — Foundation & Documentation (CURRENT):** scaffold, PWA config, docs, AGENTS.md, verification. (In progress/verification.)
+- **Phase 1 — Data Model & Storage:** entities, validation, IndexedDB repos, in-memory fallback, tests.
+- **Phase 2 — Schedule Management UI:** subject/entry CRUD, forms, validation, empty/error states.
+- **Phase 3 — Customization:** days, times, rooms, colors, display options.
+- **Phase 4 — Templates & Theming:** template picker, themes.
+- **Phase 5 — Canvas Rendering & Export:** render, preview, PNG download/share.
+- **Phase 6 — PWA Polish & Offline:** offline verification, installability, caching tuning.
+- **Phase 7 — Accessibility & Responsiveness:** a11y audit, responsive polish, performance.
+- **Phase 8 — Release & QA:** final QA, docs, deploy readiness.
+
+Do not proceed to next phase without owner authorization.
+
+## 18. Planned Project Structure
+
+```
+esked/
+  AGENTS.md
+  README.md
+  docs/architecture.md
+  index.html
+  vite.config.js
+  package.json
+  public/
+    favicon.svg
+  src/
+    App.jsx
+    main.jsx
+    index.css
+    components/
+    hooks/
+    lib/
+    storage/
+    rendering/
+    test/
+```
+
+## 19. Engineering Rules
+
+- Inspect repo + Git status before changes.
+- Read docs/config before editing.
+- Never assume files/deps/features exist.
+- Preserve working code; no unnecessary refactors.
+- No dead buttons/fake interactions.
+- No placeholder functionality for completed features.
+- Keep data local; no external transmission.
+- Handle storage failures gracefully.
+- crypto.randomUUID() with fallback.
+- Stable IDs for persisted entities.
+- No direct state mutation.
+- Clean up listeners/object URLs.
+- Semantic HTML + ARIA.
+- Min touch target 44x44.
+- No TypeScript, no backend/auth/cloud/paid services.
+
+## 20. Development Workflow
+
+For each phase:
+1. Investigate (inspect repo, git, docs).
+2. Plan (files, approach, tests).
+3. Implement (only assigned phase).
+4. Test (unit/integration, build, lint, console, acceptance).
+5. Debug (root cause, re-run, regression check).
+6. Report (structured report with status labels).
+
+Status labels: PASS, FAIL, BLOCKED, NOT TESTED. Never mark whole phase PASS if important criteria unverified.
+
+Stop after phase; wait for owner approval.
+
+## 21. Known Limitations and Technical Decisions
+
+- Node v24 used for build (newer than typical); dependencies chosen for compatibility.
+- vite-plugin-pwa v2.0.0 with vite v8; workbox-build pulls glob/minimatch with 4 moderate dev-only advisories. No safe non-breaking fix (would require downgrading to v1.1.0, losing vite 8 support). Production deps: 0 vulnerabilities (npm audit --omit=dev).
+- PWA icons are SVG only; some install targets prefer PNG. Not auto-replaced (valid config). Can add PNG later.
+- No Phase 1+ features implemented yet; only scaffold + docs.
+- @types/react v19 with React 18 runtime (minor type mismatch, no runtime impact; could align to v18 types later).
+- oxlint used instead of ESLint (configured by scaffold).
+
+## 22. Current Project Status
+
+- **Phase 0 (Foundation & Documentation):** PASS (verified).
+- **Phase 1 (Data Foundation):** PASS (verified). Data model, validation, reducer, IndexedDB, repository, React hook, autosave, fallback implemented and tested.
+- **Implemented:** Phase 0 + Phase 1 data layer. No schedule editor UI, templates, canvas, or export yet.
+- **Git:** branch main.
+- **Last verified:** Phase 1 (see section 24).
+
+## 23. Phase 0 Verification Results
+
+Commands run (actual):
+- `npm test` → 1 test file, 1 test passed (PASS)
+- `npm run lint` (oxlint) → no issues (PASS)
+- `npm run build` → success, ~174ms; PWA service worker + manifest generated; precache 7 entries (PASS)
+- `npm run preview` → HTTP 200 served; app shell renders (PASS)
+- `npm audit` → 4 moderate, dev-only (workbox-build via vite-plugin-pwa); no production impact
+- `npm audit --omit=dev` → 0 vulnerabilities (PASS)
+
+PWA verification (dist):
+- Manifest: name/short_name "Esked", display "standalone", start_url "/", scope "/", theme_color "#0f172a", background_color "#ffffff". (PASS)
+- Icons: favicon.svg (image/svg+xml, sizes "any", purpose any+maskable) — file exists in dist. (PASS, with limitation: SVG-only; some install targets prefer PNG)
+- Service worker: generated (sw.js) with skipWaiting + clientsClaim; precaches registerSW.js, index.html, favicon.svg (x2), assets JS/CSS, manifest.webmanifest; navigation fallback to index.html. (PASS generation; offline runtime not manually tested)
+- All declared icons exist in production output. (PASS)
+
+Dependency versions (actual, from package.json):
+- react 18.3.1, react-dom 18.3.1, idb 8.0.4
+- vite 8.3.6, @vitejs/plugin-react 6.1.2, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5
+- vite-plugin-pwa 2.0.0, vitest 5.1.0, jsdom 31.0.1
+- @testing-library/react 16.3.3, jest-dom 7.0.1, user-event 14.6.12
+- oxlint 1.90.0
+
+Checks:
+- No TypeScript files introduced. (PASS)
+- No backend/auth/cloud/paid dependencies. (PASS)
+- No unnecessary external runtime requests. (PASS)
+- Smoke test meaningful (renders Esked h1). (PASS)
+- App shell renders. (PASS)
+
+---
+
+## 24. Phase 1 Implementation Details
+
+### Data model (src/lib/model.js)
+- Constants: `WEEKDAYS` (Mon..Sun), `TIME_REGEX` (HH:mm 24h), `HEX_COLOR_REGEX`, `DEFAULT_SETTINGS`, `DEFAULT_SUBJECT_COLOR`.
+- Factories: `createMeeting`, `createSubject`, `createDefaultSchedule` (deeply independent; unique ids).
+- Validators: `isWeekday`, `isValidTime`, `isValidColor`, `validateMeeting`, `validateSubject`, `validateSettings`, `validateSchedule`. Return `{ valid, errors }`.
+- Rules: subject name required; subject may have 0 meetings; optional meeting details may be empty; invalid/unknown data not silently discarded (reported via errors).
+
+### Reducer (src/lib/scheduleReducer.js)
+Actions (SCHEDULE_ACTIONS):
+- UPDATE_TITLE, UPDATE_SEMESTER, ADD_SUBJECT, UPDATE_SUBJECT, DELETE_SUBJECT,
+  ADD_MEETING, UPDATE_MEETING, DELETE_MEETING, UPDATE_SETTINGS, REPLACE, RESET.
+- Immutable updates; no storage inside reducer; invalid action types return state unchanged.
+
+### IndexedDB schema (src/storage/db.js)
+- DB name: `esked-db`, version 1.
+- Stores: `schedules` (keyPath `id`), `meta` (keyPath `key`).
+- Singleton connection promise; reset helper for tests.
+
+### Repository (src/storage/scheduleRepository.js)
+API: `getDefaultSchedule()`, `getSchedule(id)`, `saveSchedule(schedule)`, `deleteSchedule(id)`, `init()`.
+- Ensures default schedule exists (stored in `meta` under `defaultScheduleId`).
+- Throws `StorageError` with codes on failure.
+
+### React integration (src/hooks/useSchedule.js)
+- useReducer + initial load from repository.
+- Exposes: schedule, dispatch, loading, saving, error, storageMode, storageWarning, isPersistent.
+- Dirty tracking prevents async init from overwriting newer state.
+
+### Autosave
+- Debounced ~400ms after meaningful changes.
+- Stale-write protection via request id counter.
+- Flush on `visibilitychange` (hidden) and unmount.
+- Rapid updates collapse into fewer saves; final state persisted.
+
+### Storage fallback
+- If init fails: storageMode 'memory', storageWarning set, schedule kept in memory, autosave disabled, error exposed.
+- Save failures set error state; do not falsely claim persistence.
+
+### Files created
+- src/lib/ids.js
+- src/lib/model.js
+- src/lib/scheduleReducer.js
+- src/storage/db.js
+- src/storage/scheduleRepository.js
+- src/hooks/useSchedule.js
+- Tests: src/lib/model.test.js, src/lib/scheduleReducer.test.js, src/storage/scheduleRepository.test.js, src/hooks/useSchedule.test.jsx
+
+### Dependencies changed
+- Added devDependency: fake-indexeddb (testing).
+
+### Test results
+- `npm test`: 5 test files, 37 tests passed (PASS).
+- `npm run lint`: no issues (PASS).
+- `npm run build`: success (PASS).
+
+### Known limitations
+- Autosave runtime stale-write protection tested via request id logic; full concurrency scenarios not exhaustively tested.
+- In-memory fallback only triggers on init failure; quota errors during save set error but do not automatically switch modes.
+- No schedule editor UI yet (Phase 2).
+- @types/react v19 with React 18 runtime remains.
+
+### Next authorized phase
+Phase 2 — Schedule Management UI (subject/entry CRUD, forms, validation, empty/error states), pending owner approval.
+
+---
+
+## Session Recovery Instructions (MANDATORY)
+
+Every new OpenCode session MUST, before doing project work:
+
+1. Read `AGENTS.md` in full.
+2. Inspect the repository (ls/tree) and Git status.
+3. Review recent commits and uncommitted changes.
+4. Compare documented progress in AGENTS.md with actual implementation (do not trust reports).
+5. Run verification commands (`npm test`, `npm run lint`, `npm run build`) instead of assuming pass.
+6. Identify the next authorized task from AGENTS.md / owner instructions.
+7. Never assume unfinished work is complete.
+8. If ambiguity or blocker exists, stop and report rather than pretending completion.
+
+## Documentation Maintenance
+
+- Update `AGENTS.md` whenever architecture, requirements, dependencies, phase status, or known limitations change.
+- Keep `docs/architecture.md` and `README.md` consistent with `AGENTS.md`.
+- Clearly distinguish planned vs implemented functionality.
+- Do not invent completion claims.
+- Preserve full specification; do not replace with short summary.
