@@ -11,18 +11,11 @@ export const WALLPAPER_PRESETS = {
   desktop: { width: 1920, height: 1080, label: 'Desktop (16:9)' },
 }
 
-// Legacy template name mapping for display/compatibility.
-export const LEGACY_TEMPLATE_MAP = {
-  classic: 'weeklyColumns',
-  compact: 'dailyList',
-  minimal: 'todayFocus',
-}
-
-// Re-export helpers/constants (excluding conflicting WALLPAPER_PRESETS).
+// Re-export helpers/constants.
 export {
   THEME_COLORS,
   SUPPORTED_TEMPLATES,
   SUPPORTED_THEMES,
-  LEGACY_TEMPLATE_MAP as _LTM,
+  LEGACY_TEMPLATE_MAP,
 } from './wallpaperConstants.js'
 export * from './wallpaperUtils.js'

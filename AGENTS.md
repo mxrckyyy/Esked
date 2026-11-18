@@ -337,10 +337,10 @@ Stop after phase; wait for owner approval.
 - **Phase 5 (Preview and Export):** PASS (verified). Preview + PNG download/share implemented.
 - **Phase 6 (PWA and Offline):** PASS (verified). Manifest, icons, SW, install, update, offline indicator.
 - **Phase 7 (UX Polish):** PASS (verified). Visual consistency, accessibility, responsive tweaks.
-- **Phase 8 (Final QA and Release Readiness):** NOT STARTED.
-- **Implemented:** Phases 0-7 including UX polish.
+- **Phase 8 (Final QA and Release Readiness):** PASS (verified). Final QA and release-readiness audit.
+- **Implemented:** Phases 0-8 complete.
 - **Git:** branch main.
-- **Last verified:** Phase 7 accessibility audit (see section 33).
+- **Last verified:** Phase 8 (see section 34).
 
 ## 23. Phase 0 Verification Results
 
@@ -859,6 +859,36 @@ Phase 8 — Final QA and Release Readiness, pending owner approval.
 ### Known limitations
 - No automated WCAG audit performed.
 - Color contrast not measured with tooling.
+
+---
+
+## 34. Phase 8 Final QA and Release Readiness
+
+### Defect fixed
+- Fixed `LEGACY_TEMPLATE_MAP` redeclaration/export issue in `src/rendering/wallpaper.js` that broke production builds when SettingsPanel imports it.
+
+### Verification
+- npm test: 15 files, 143 tests passed.
+- npm run lint: no issues.
+- npm run build: success.
+- npm audit --omit=dev: 0 vulnerabilities.
+- npm audit: 4 moderate dev-only advisories (workbox-build via vite-plugin-pwa), no safe non-breaking fix.
+
+### Production output
+- Bundle: 203KB JS, 18KB CSS.
+- Precache: 11 entries, 221.81 KiB.
+- Icons: 192x192 and 512x512 PNG.
+
+### Browser verification
+- NOT TESTED (no browser tool).
+
+### Remaining limitations
+- No real-browser visual/offline verification.
+- 4 dev-only audit advisories without safe fix.
+- Visual verification not performed.
+
+### Release recommendation
+- READY WITH DOCUMENTED LIMITATIONS.
 
 ---
 
