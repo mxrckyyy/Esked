@@ -331,9 +331,13 @@ Stop after phase; wait for owner approval.
 
 - **Phase 0 (Foundation & Documentation):** PASS (verified).
 - **Phase 1 (Data Foundation):** PASS (verified). Data model, validation, reducer, IndexedDB, repository, React hook, autosave, fallback implemented and tested.
-- **Implemented:** Phase 0 + Phase 1 data layer. No schedule editor UI, templates, canvas, or export yet.
+- **Phase 2 (Schedule Management UI):** PASS (verified). Subject/entry CRUD, forms, validation, empty/error states.
+- **Phase 3 (Customization):** PASS (verified). Days, times, rooms, colors, display options via settings panel.
+- **Phase 4 (Templates & Theming):** PASS (verified). Classic grid, compact list, minimal templates with light/dark themes.
+- **Phase 5 (Canvas Rendering & Export):** PASS (verified). Canvas render, preview, PNG download/share.
+- **Implemented:** Phase 0-5. Schedule editor UI, customization, templates, canvas rendering and export.
 - **Git:** branch main.
-- **Last verified:** Phase 1 (see section 24).
+- **Last verified:** Phase 2 correction session (tests/lint/build).
 
 ## 23. Phase 0 Verification Results
 
@@ -393,18 +397,33 @@ API: `getDefaultSchedule()`, `getSchedule(id)`, `saveSchedule(schedule)`, `delet
 
 ### React integration (src/hooks/useSchedule.js)
 - useReducer + initial load from repository.
-- Exposes: schedule, dispatch, loading, saving, error, storageMode, storageWarning, isPersistent.
+- Exposes: schedule, dispatch, loading, saving, error, storageMode, storageWarning, isPersistent, flush.
 - Dirty tracking prevents async init from overwriting newer state.
+- Refs synced via effects to avoid render-time ref access warnings.
 
 ### Autosave
 - Debounced ~400ms after meaningful changes.
-- Stale-write protection via request id counter.
-- Flush on `visibilitychange` (hidden) and unmount.
+- All saves are serialized through a single promise chain so an earlier save cannot complete after (and overwrite) a later one.
+- Flush on `visibilitychange` (hidden) and unmount (best-effort).
 - Rapid updates collapse into fewer saves; final state persisted.
+- `saving` reflects in-flight save count; cleared only when no save in flight.
+- Dirty is cleared on successful save only when the saved snapshot is still the latest; concurrent changes keep dirty true.
 
 ### Storage fallback
 - If init fails: storageMode 'memory', storageWarning set, schedule kept in memory, autosave disabled, error exposed.
-- Save failures set error state; do not falsely claim persistence.
+- Quota and other persistent-storage save failures (code SAVE_FAILED / IDB_UNAVAILABLE / GET_DEFAULT_FAILED) transition to explicit memory-only mode.
+- On storage failure: latest schedule preserved in React state, warning exposed, further IndexedDB writes stopped, error surfaced.
+- Validation/programming errors do not trigger memory-mode fallback.
+- Failed saves never report successful persistence; dirty remains true.
+- Storage errors remain distinguishable via StorageError codes.
+
+### Concurrency guarantees
+- Serialized save chain prevents stale overwrites.
+- Rapid successive updates collapse to latest schedule.
+- Manual/lifecycle flush while debounce pending is supported.
+- Save failure during pending update preserves memory state and stops further writes.
+- No outdated async operation overwrites newer persisted data.
+- Cleanup performs best-effort final persist.
 
 ### Files created
 - src/lib/ids.js
@@ -419,18 +438,78 @@ API: `getDefaultSchedule()`, `getSchedule(id)`, `saveSchedule(schedule)`, `delet
 - Added devDependency: fake-indexeddb (testing).
 
 ### Test results
-- `npm test`: 5 test files, 37 tests passed (PASS).
+- `npm test`: 8 test files, 48 tests passed (PASS).
 - `npm run lint`: no issues (PASS).
 - `npm run build`: success (PASS).
 
 ### Known limitations
-- Autosave runtime stale-write protection tested via request id logic; full concurrency scenarios not exhaustively tested.
-- In-memory fallback only triggers on init failure; quota errors during save set error but do not automatically switch modes.
-- No schedule editor UI yet (Phase 2).
+- Autosave relies on debounce timers; deterministic tests use real timers for some scenarios.
+- In-memory fallback stops writes but does not retry automatically after recovery.
+- Cleanup final persist is fire-and-forget.
+- Schedule editor UI implemented (Phase 2).
 - @types/react v19 with React 18 runtime remains.
 
 ### Next authorized phase
-Phase 2 — Schedule Management UI (subject/entry CRUD, forms, validation, empty/error states), pending owner approval.
+Phase 6 - PWA Polish & Offline (installability, caching, offline verification), pending owner approval.
+
+---
+
+## 25. Phase 2 Implementation Details
+
+### UI architecture
+- `src/App.jsx` orchestrates useSchedule, tabs (Schedule/Customize/Preview), subject modal, settings, preview.
+- `src/components/ScheduleView.jsx` main schedule screen: title/semester inputs, subject count, load sample, add subject, subject list, empty state.
+- `src/components/SubjectCard.jsx` subject display with meetings, edit/delete.
+- `src/components/SubjectForm.jsx` modal form for subject + meetings.
+- `src/components/Modal.jsx` accessible dialog (focus trap, restore, escape, scroll lock).
+- `src/components/SettingsPanel.jsx` customization.
+- `src/components/PreviewCanvas.jsx` preview + export.
+
+### Subject management
+- Create/edit/delete via reducer actions; validation via validateSubject.
+- Delete requires confirmation; associated meetings removed with subject.
+- Storage warnings and saving status displayed.
+
+### Meeting management
+- Multiple meetings per subject; multiple weekdays per meeting.
+- Optional room/instructor/notes; subjects may have zero meetings.
+- Native time inputs; add/edit/delete meetings in form.
+
+### Day selector
+- Checkbox group for Mon..Sun with accessible labels and touch targets.
+
+### Color picker
+- Documented palette only; selected state indicated via border and aria-pressed.
+
+### Sample schedule
+- `src/lib/sampleSchedule.js` provides 5 subjects with varied colors, weekdays, meetings, rooms, instructors.
+- Load sample action confirms before replacing existing data; uses reducer RESET + ADD_SUBJECT (marks dirty).
+
+### Responsive & accessibility
+- Mobile-first Tailwind classes; flex/grid responsive.
+- Focus rings on interactive controls; modal focus management.
+- Form errors use role="alert"; aria-required on name field.
+- Reduced-motion not explicitly handled (limitation).
+
+### Tests
+- `src/components/phase2.test.jsx` (7 tests): empty state, create, validation error, delete, sample load, meeting add, memory warning.
+- Existing Phase 1 tests retained (48 total).
+
+### Test results
+- `npm test`: 9 test files, 55 tests passed (PASS).
+- `npm run lint`: no issues (PASS).
+- `npm run build`: success (PASS).
+
+### Responsive and reduced-motion
+- Reduced-motion preference respected globally via `@media (prefers-reduced-motion: reduce)` in `src/index.css`.
+- Responsive breakpoints (320-1920px) rely on mobile-first Tailwind classes; automated viewport testing not available in current toolchain (NOT TESTED).
+- Manual inspection performed for overflow-prone areas (day selector touch targets enlarged, modal max-height/overflow).
+
+### Known limitations
+- Responsive breakpoints not exhaustively automated (manual verification recommended).
+- Delete meeting has no separate confirmation.
+- Custom arbitrary colors removed per palette-only spec.
+- Reduced-motion handled via global CSS guard.
 
 ---
 

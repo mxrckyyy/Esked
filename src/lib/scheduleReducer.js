@@ -46,6 +46,11 @@ export function scheduleReducer(state, action) {
       const subject = payload && payload.id ? { ...payload } : createSubject(payload || {})
       if (!subject.id) subject.id = createId()
       if (!Array.isArray(subject.meetings)) subject.meetings = []
+      subject.meetings = subject.meetings.map((m) => {
+        const copy = { ...m }
+        if (!copy.id) copy.id = createId()
+        return copy
+      })
       return { ...state, subjects: [...state.subjects, subject] }
     }
 
@@ -54,9 +59,19 @@ export function scheduleReducer(state, action) {
       if (!id) return state
       return {
         ...state,
-        subjects: state.subjects.map((s) =>
-          s.id === id ? { ...s, ...changes, meetings: changes && changes.meetings ? changes.meetings.map((m) => ({ ...m })) : s.meetings } : s
-        ),
+        subjects: state.subjects.map((s) => {
+          if (s.id !== id) return s
+          let meetings = s.meetings
+          if (changes && Array.isArray(changes.meetings)) {
+            meetings = changes.meetings.map((m) => {
+              const copy = { ...m }
+              if (!copy.id) copy.id = createId()
+              return copy
+            })
+          }
+          const { meetings: _m, ...rest } = changes || {}
+          return { ...s, ...rest, meetings }
+        }),
       }
     }
 

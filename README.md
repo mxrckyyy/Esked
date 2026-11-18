@@ -19,8 +19,8 @@ beautiful, readable, high-resolution phone wallpapers.
 
 ## Current Implementation Status
 
-Phase 0 only: project scaffold and documentation. No schedule, customization, template,
-rendering, or export features are implemented yet.
+Phases 0-5 implemented: scaffold, data layer, schedule management UI, customization,
+templates/themes, canvas rendering and PNG export. PWA configured.
 
 ## Privacy
 

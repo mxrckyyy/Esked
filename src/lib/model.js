@@ -52,6 +52,7 @@ export function createSubject(overrides = {}) {
     id: createId(),
     name: '',
     color: DEFAULT_SUBJECT_COLOR,
+    notes: '',
     meetings: [],
   }
   const meetings = Array.isArray(overrides.meetings)
@@ -123,6 +124,7 @@ export function validateSubject(subject) {
     errors.push('name is required')
   }
   if (!isValidColor(subject.color)) errors.push('color must be a valid hex color')
+  if (subject.notes != null && typeof subject.notes !== 'string') errors.push('notes must be a string')
   if (!Array.isArray(subject.meetings)) {
     errors.push('meetings must be an array')
   } else {
