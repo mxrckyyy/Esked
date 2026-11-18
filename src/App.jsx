@@ -187,7 +187,7 @@ export default function App() {
         ) : null}
       </section>
 
-      <footer className="mx-auto max-w-4xl px-4 pb-6 text-xs text-slate-500">
+      <footer className="mx-auto max-w-4xl px-4 pb-6 text-xs text-slate-500" aria-live="polite">
         {saving ? 'Saving…' : storageMode === 'persistent' ? 'Saved locally' : 'Memory only'}
       </footer>
 

@@ -91,12 +91,16 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
           </label>
           <textarea
             id="quick-add-text"
+            aria-describedby="quick-add-help"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="e.g. Math 201 MWF 8-9:30 R204"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
+          <p id="quick-add-help" className="mt-1 text-xs text-slate-500">
+            Format: Subject Days Time [Room]. Examples: "Math 201 MWF 8-9:30 R204", "Physics 101 Tue Thu 10:00-11:30 Room 302".
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"

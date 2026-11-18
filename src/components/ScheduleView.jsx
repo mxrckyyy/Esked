@@ -72,7 +72,7 @@ export function ScheduleView({
       {schedule.subjects.length === 0 ? (
         <EmptyState
           title="No subjects yet"
-          description="Add your first subject and meeting to start building your wallpaper."
+          description="Add your first subject and meeting to start building your wallpaper. Schedules are stored locally on this device."
           action={
             <button
               type="button"
