@@ -13,7 +13,6 @@ export function Modal({ open, title, children, onClose }) {
     const dialog = dialogRef.current
     if (!dialog) return
 
-    // Focus first focusable element.
     const focusables = dialog.querySelectorAll(FOCUSABLE)
     if (focusables.length) focusables[0].focus()
     else dialog.focus()
@@ -43,7 +42,6 @@ export function Modal({ open, title, children, onClose }) {
       }
     }
     document.addEventListener('keydown', handleKey)
-    // Prevent background scroll while open.
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
@@ -58,7 +56,7 @@ export function Modal({ open, title, children, onClose }) {
   if (!open) return null
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -67,18 +65,18 @@ export function Modal({ open, title, children, onClose }) {
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-xl bg-white p-4 shadow-xl outline-none"
+        className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-overlay outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
+          <h2 id="modal-title" className="text-lg font-semibold text-ink">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-ink-3 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
           >
             X
           </button>
@@ -91,9 +89,9 @@ export function Modal({ open, title, children, onClose }) {
 
 export function EmptyState({ title, description, action }) {
   return (
-    <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-      <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-      <p className="mt-2 text-sm text-slate-600">{description}</p>
+    <div className="mt-6 rounded-lg border border-dashed border-line-strong bg-surface p-8 text-center">
+      <h3 className="text-lg font-semibold text-ink">{title}</h3>
+      <p className="mt-2 text-sm text-ink-2">{description}</p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )

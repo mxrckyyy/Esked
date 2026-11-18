@@ -341,6 +341,9 @@ Stop after phase; wait for owner approval.
 - **Implemented:** Phases 0-8 complete.
 - **Git:** branch main.
 - **Last verified:** Phase 8 (see section 34).
+- **Phase A (Design Tokens and Theme System):** Implemented — semantic CSS tokens (light/dark), FOUC-safe init script in `index.html`, `useTheme` hook with persisted manual override and OS-preference fallback, accessible `ThemeToggle` in header, App chrome converted to tokens. Wallpaper theme remains independent. Verified: 156 tests passed, lint clean, build success. Visual verification NOT TESTED (no browser tool).
+- **Phase B (Component Redesign):** Implemented — all application UI components converted to semantic tokens (canvas/surface/ink/line/accent/focus/warn/danger/success), hardcoded slate/red/amber/blue colors removed from app chrome, card shadows removed, radii standardized to role-based values, focus rings unified. Wallpaper rendering/export colors untouched. Verified: 156 tests passed, lint clean, build success. Visual verification NOT TESTED (no browser tool).
+- **Phase C (Responsive Layout Redesign):** Implemented — header reorganized with min-w-0/flex-wrap, ScheduleView title inputs in responsive grid with intentional action toolbar (primary Add subject full-width on mobile, secondary actions grouped), SubjectCard header wraps with shrink-0 actions, form paired fields collapse to single column on mobile (sm:grid-cols-2), modal safe-area bottom padding, PreviewCanvas export buttons full-width on mobile, min-h-dvh. Semantic tokens preserved. Verified: 156 tests passed, lint clean, build success. Follow-up CDP verification (Edge headless): no horizontal overflow at 320/360/390/430/768/1024/1440 (scrollWidth-clientWidth=0, no offending elements); modal + QuickAdd open without overflow at 320; theme toggle, manual persistence (dark/light), and OS fallback verified. Visual appearance NOT assessed (model cannot view images).
 
 ## 23. Phase 0 Verification Results
 

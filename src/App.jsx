@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useSchedule } from './hooks/useSchedule.js'
 import { useOnlineStatus } from './hooks/useOnlineStatus.js'
+import { useTheme } from './hooks/useTheme.js'
+import { ThemeToggle } from './components/ThemeToggle.jsx'
 import { usePwaInstall } from './hooks/usePwaInstall.js'
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate.js'
 import { SCHEDULE_ACTIONS } from './lib/scheduleReducer.js'
@@ -25,6 +27,7 @@ const TABS = [
 export default function App() {
   const { schedule, dispatch, loading, saving, error, storageMode, storageWarning } = useSchedule()
   const online = useOnlineStatus()
+  const { theme, toggle: toggleTheme } = useTheme()
   const { canInstall, promptInstall } = usePwaInstall()
   const { updateAvailable, reloadNeeded, update, reload } = useServiceWorkerUpdate()
   const [tab, setTab] = useState('schedule')
@@ -96,10 +99,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+      <main className="flex min-h-dvh items-center justify-center bg-canvas text-ink">
         <div className="text-center">
           <h1 className="text-xl font-semibold tracking-tight">Esked</h1>
-          <p className="mt-2 text-slate-600">Loading…</p>
+          <p className="mt-2 text-ink-2">Loading…</p>
         </div>
       </main>
     )
@@ -108,50 +111,55 @@ export default function App() {
   const scheduleValid = validateSchedule(schedule).valid
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <main className="min-h-dvh bg-canvas text-ink">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">Esked</h1>
-            <span className="text-sm text-slate-500">Offline-first schedule wallpapers</span>
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold tracking-tight text-ink">Esked</h1>
+            <span className="text-sm text-ink-3">Offline-first schedule wallpapers</span>
           </div>
-          <nav className="flex gap-2" aria-label="Primary">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                aria-current={tab === t.id ? 'page' : undefined}
-                className={`min-h-[44px] rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-400 ${
-                  tab === t.id
-                    ? 'bg-slate-900 text-white'
-                    : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
+          <div className="flex flex-wrap items-center gap-2">
+            <nav className="flex flex-wrap gap-2" aria-label="Primary">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  aria-current={tab === t.id ? 'page' : undefined}
+                  className={`min-h-[44px] rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-focus ${
+                    tab === t.id
+                      ? 'bg-accent text-accent-ink'
+                      : 'border border-line text-ink-2 hover:bg-surface-raised'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+            <div className="shrink-0">
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            </div>
+          </div>
         </div>
       </header>
 
       {storageWarning ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
             {storageWarning}
           </div>
         </div>
       ) : null}
       {error ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {String(error.message || error)}
           </div>
         </div>
       ) : null}
       {formError ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {formError}
           </div>
         </div>
@@ -182,12 +190,12 @@ export default function App() {
           scheduleValid ? (
             <PreviewCanvas schedule={schedule} />
           ) : (
-            <p className="text-sm text-red-600">Fix schedule validation errors before preview.</p>
+            <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>
           )
         ) : null}
       </section>
 
-      <footer className="mx-auto max-w-4xl px-4 pb-6 text-xs text-slate-500" aria-live="polite">
+      <footer className="mx-auto max-w-4xl px-4 pb-6 text-xs text-ink-3" aria-live="polite">
         {saving ? 'Saving…' : storageMode === 'persistent' ? 'Saved locally' : 'Memory only'}
       </footer>
 

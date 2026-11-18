@@ -13,9 +13,9 @@ export function ScheduleView({
 }) {
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-slate-500" htmlFor="schedule-title">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="min-w-0">
+          <label className="block text-xs font-medium text-ink-3" htmlFor="schedule-title">
             Schedule title
           </label>
           <input
@@ -23,11 +23,11 @@ export function ScheduleView({
             type="text"
             value={schedule.title}
             onChange={(e) => onUpdateTitle(e.target.value)}
-            className="mt-1 w-full max-w-md rounded-md border border-slate-300 px-3 py-2 text-lg font-semibold"
+            className="mt-1 w-full max-w-md rounded-md border border-line-strong bg-surface px-3 py-2 text-lg font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-focus"
           />
         </div>
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-slate-500" htmlFor="schedule-semester">
+        <div className="min-w-0">
+          <label className="block text-xs font-medium text-ink-3" htmlFor="schedule-semester">
             Semester
           </label>
           <input
@@ -35,38 +35,38 @@ export function ScheduleView({
             type="text"
             value={schedule.semester}
             onChange={(e) => onUpdateSemester(e.target.value)}
-            className="mt-1 w-full max-w-md rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full max-w-md rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus"
             placeholder="e.g. Fall 2026"
           />
         </div>
-        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-          <span className="text-sm text-slate-500">
-            {schedule.subjects.length} subject{schedule.subjects.length === 1 ? '' : 's'}
-          </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-full text-sm text-ink-3 sm:w-auto">
+          {schedule.subjects.length} subject{schedule.subjects.length === 1 ? '' : 's'}
+        </span>
+        <button
+          type="button"
+          onClick={onLoadSample}
+          className="min-h-[44px] rounded-lg border border-line-strong bg-surface px-4 text-sm font-medium text-ink-2 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
+        >
+          Load sample
+        </button>
+        {onQuickAdd ? (
           <button
             type="button"
-            onClick={onLoadSample}
-            className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            onClick={onQuickAdd}
+            className="min-h-[44px] rounded-lg border border-line-strong bg-surface px-4 text-sm font-medium text-ink-2 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
           >
-            Load sample
+            Quick add
           </button>
-          <button
-            type="button"
-            onClick={onAddSubject}
-            className="min-h-[44px] rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
-          >
-            Add subject
-          </button>
-          {onQuickAdd ? (
-            <button
-              type="button"
-              onClick={onQuickAdd}
-              className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
-            >
-              Quick add
-            </button>
-          ) : null}
-        </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={onAddSubject}
+          className="min-h-[44px] w-full rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-focus sm:ml-auto sm:w-auto"
+        >
+          Add subject
+        </button>
       </div>
 
       {schedule.subjects.length === 0 ? (
@@ -77,7 +77,7 @@ export function ScheduleView({
             <button
               type="button"
               onClick={onAddSubject}
-              className="min-h-[44px] rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              className="min-h-[44px] rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90"
             >
               Add subject
             </button>

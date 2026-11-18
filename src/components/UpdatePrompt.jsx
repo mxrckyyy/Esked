@@ -2,7 +2,7 @@ export function UpdatePrompt({ available, reloadNeeded, onUpdate, onReload }) {
   if (!available && !reloadNeeded) return null
   return (
     <div className="mx-auto max-w-4xl px-4 pt-2">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-surface-raised px-3 py-2 text-sm text-ink-2">
         {reloadNeeded ? (
           <span>Update installed. Reload to apply.</span>
         ) : (
@@ -12,7 +12,7 @@ export function UpdatePrompt({ available, reloadNeeded, onUpdate, onReload }) {
           <button
             type="button"
             onClick={onReload}
-            className="min-h-[44px] rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
+            className="min-h-[44px] rounded-md bg-accent px-3 text-sm font-medium text-accent-ink hover:bg-accent/90"
           >
             Reload
           </button>
@@ -20,7 +20,7 @@ export function UpdatePrompt({ available, reloadNeeded, onUpdate, onReload }) {
           <button
             type="button"
             onClick={onUpdate}
-            className="min-h-[44px] rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
+            className="min-h-[44px] rounded-md bg-accent px-3 text-sm font-medium text-accent-ink hover:bg-accent/90"
           >
             Update
           </button>

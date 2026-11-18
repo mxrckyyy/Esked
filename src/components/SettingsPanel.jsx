@@ -19,17 +19,17 @@ export function SettingsPanel({ settings, onChange }) {
   const templateValue = normalizeTemplate(settings.template)
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-slate-900">Customize</h2>
+      <h2 className="text-xl font-semibold text-ink">Customize</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-slate-700" htmlFor="template">
+          <label className="block text-sm font-medium text-ink-2" htmlFor="template">
             Template
           </label>
           <select
             id="template"
             value={templateValue}
             onChange={(e) => set('template', e.target.value)}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           >
             {TEMPLATE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -39,21 +39,21 @@ export function SettingsPanel({ settings, onChange }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700" htmlFor="theme">
+          <label className="block text-sm font-medium text-ink-2" htmlFor="theme">
             Theme
           </label>
           <select
             id="theme"
             value={settings.theme}
             onChange={(e) => set('theme', e.target.value)}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700" htmlFor="preset">
+          <label className="block text-sm font-medium text-ink-2" htmlFor="preset">
             Wallpaper size
           </label>
           <select
@@ -64,7 +64,7 @@ export function SettingsPanel({ settings, onChange }) {
               setCustom(v === 'custom')
               set('wallpaperPreset', v)
             }}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           >
             {Object.entries(WALLPAPER_PRESETS).map(([k, v]) => (
               <option key={k} value={k}>
@@ -75,9 +75,9 @@ export function SettingsPanel({ settings, onChange }) {
           </select>
         </div>
         {custom || settings.wallpaperPreset === 'custom' ? (
-          <div className="sm:col-span-2 grid grid-cols-2 gap-2">
+          <div className="sm:col-span-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-slate-700" htmlFor="custom-w">
+              <label className="block text-sm font-medium text-ink-2" htmlFor="custom-w">
                 Width
               </label>
               <input
@@ -85,11 +85,11 @@ export function SettingsPanel({ settings, onChange }) {
                 type="number"
                 value={settings.width || ''}
                 onChange={(e) => set('width', Number(e.target.value))}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700" htmlFor="custom-h">
+              <label className="block text-sm font-medium text-ink-2" htmlFor="custom-h">
                 Height
               </label>
               <input
@@ -97,7 +97,7 @@ export function SettingsPanel({ settings, onChange }) {
                 type="number"
                 value={settings.height || ''}
                 onChange={(e) => set('height', Number(e.target.value))}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
               />
             </div>
           </div>

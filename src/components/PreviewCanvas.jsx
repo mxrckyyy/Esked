@@ -126,30 +126,30 @@ export function PreviewCanvas({ schedule }) {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-slate-900">Preview</h2>
+      <h2 className="text-xl font-semibold text-ink">Preview</h2>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={overlay} onChange={(e) => setOverlay(e.target.checked)} />
           Safe zones
         </label>
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))} className="min-h-[44px] rounded-md border border-slate-300 px-3 text-sm">-</button>
+          <button type="button" onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">-</button>
           <span className="text-sm">{Math.round(zoom * 100)}%</span>
-          <button type="button" onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="min-h-[44px] rounded-md border border-slate-300 px-3 text-sm">+</button>
-          <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] rounded-md border border-slate-300 px-3 text-sm">Reset</button>
+          <button type="button" onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">+</button>
+          <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">Reset</button>
         </div>
       </div>
       <div ref={containerRef} className="flex justify-center overflow-hidden">
         <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
           <canvas
             ref={canvasRef}
-            className="h-auto max-w-full rounded-lg border border-slate-200 shadow-sm"
+            className="h-auto max-w-full rounded-lg border border-line"
             aria-label="Wallpaper preview"
           />
         </div>
       </div>
       {warnings.length > 0 ? (
-        <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
           <ul className="list-disc pl-5">
             {warnings.map((w, i) => (
               <li key={i}>{w}</li>
@@ -162,7 +162,7 @@ export function PreviewCanvas({ schedule }) {
           type="button"
           onClick={handleDownload}
           disabled={exporting}
-          className="min-h-[44px] rounded-lg bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+          className="min-h-[44px] w-full rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90 disabled:opacity-60 sm:w-auto"
         >
           {exporting ? 'Generating…' : 'Download PNG'}
         </button>
@@ -171,15 +171,15 @@ export function PreviewCanvas({ schedule }) {
             type="button"
             onClick={handleShare}
             disabled={exporting}
-            className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm font-medium hover:bg-slate-50 disabled:opacity-60"
+            className="min-h-[44px] w-full rounded-lg border border-line-strong px-4 text-sm font-medium hover:bg-surface-raised disabled:opacity-60 sm:w-auto"
           >
             Share
           </button>
         ) : null}
       </div>
-      {status ? <p className="text-center text-sm text-slate-600">{status}</p> : null}
-      {error ? <p className="text-center text-sm text-red-600">{error}</p> : null}
-      <p className="text-center text-xs text-slate-500">
+      {status ? <p className="text-center text-sm text-ink-2">{status}</p> : null}
+      {error ? <p className="text-center text-sm text-danger">{error}</p> : null}
+      <p className="text-center text-xs text-ink-3">
         Output: {fullW} × {fullH}px
       </p>
     </section>

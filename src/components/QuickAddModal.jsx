@@ -86,7 +86,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
     <Modal open={open} title="Quick add subject" onClose={handleClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700" htmlFor="quick-add-text">
+          <label className="block text-sm font-medium text-ink-2" htmlFor="quick-add-text">
             Schedule text
           </label>
           <textarea
@@ -96,16 +96,16 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="e.g. Math 201 MWF 8-9:30 R204"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           />
-          <p id="quick-add-help" className="mt-1 text-xs text-slate-500">
+          <p id="quick-add-help" className="mt-1 text-xs text-ink-3">
             Format: Subject Days Time [Room]. Examples: "Math 201 MWF 8-9:30 R204", "Physics 101 Tue Thu 10:00-11:30 Room 302".
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleParse}
-              className="min-h-[44px] rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              className="min-h-[44px] rounded-md bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90"
             >
               Parse
             </button>
@@ -116,7 +116,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                   handleClose()
                   onSwitchToManual()
                 }}
-                className="min-h-[44px] rounded-md border border-slate-300 px-4 text-sm hover:bg-slate-50"
+                className="min-h-[44px] rounded-md border border-line-strong px-4 text-sm hover:bg-surface-raised"
               >
                 Use manual form
               </button>
@@ -125,7 +125,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
         </div>
 
         {errors.length > 0 ? (
-          <div role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 bg-surface px-3 py-2 text-sm text-ink text-danger">
             <ul className="list-disc pl-5">
               {errors.map((er, i) => (
                 <li key={i}>{er}</li>
@@ -134,7 +134,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
           </div>
         ) : null}
         {warnings.length > 0 ? (
-          <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <div className="rounded-md border border-warn/40 bg-warn/10 bg-surface px-3 py-2 text-sm text-ink text-warn">
             <ul className="list-disc pl-5">
               {warnings.map((w, i) => (
                 <li key={i}>{w}</li>
@@ -144,9 +144,9 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
         ) : null}
 
         {parsed ? (
-          <div className="space-y-3 rounded-md border border-slate-200 p-3">
+          <div className="space-y-3 rounded-md border border-line p-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700" htmlFor="qa-name">
+              <label className="block text-sm font-medium text-ink-2" htmlFor="qa-name">
                 Subject name
               </label>
               <input
@@ -154,16 +154,16 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
               />
             </div>
             <div>
-              <span className="block text-sm font-medium text-slate-700">Days</span>
+              <span className="block text-sm font-medium text-ink-2">Days</span>
               <div className="mt-1 flex flex-wrap gap-1">
                 {WEEKDAYS.map((d) => (
                   <label
                     key={d}
-                    className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-xs font-medium hover:bg-slate-50"
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-md border border-line px-2 text-xs font-medium hover:bg-surface-raised"
                   >
                     <input
                       type="checkbox"
@@ -176,9 +176,9 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <div>
-                <label className="text-xs text-slate-600" htmlFor="qa-start">
+                <label className="text-xs text-ink-3" htmlFor="qa-start">
                   Start
                 </label>
                 <input
@@ -186,11 +186,11 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                   type="time"
                   value={start}
                   onChange={(e) => setStart(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm text-ink"
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-600" htmlFor="qa-end">
+                <label className="text-xs text-ink-3" htmlFor="qa-end">
                   End
                 </label>
                 <input
@@ -198,12 +198,12 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                   type="time"
                   value={end}
                   onChange={(e) => setEnd(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm text-ink"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700" htmlFor="qa-room">
+              <label className="block text-sm font-medium text-ink-2" htmlFor="qa-room">
                 Room
               </label>
               <input
@@ -211,20 +211,20 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                 type="text"
                 value={room}
                 onChange={(e) => setRoom(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="min-h-[44px] rounded-md border border-slate-300 px-4 text-sm hover:bg-slate-50"
+                className="min-h-[44px] rounded-md border border-line-strong px-4 text-sm hover:bg-surface-raised"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="min-h-[44px] rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+                className="min-h-[44px] rounded-md bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90"
               >
                 Add subject
               </button>
