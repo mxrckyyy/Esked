@@ -250,15 +250,15 @@ Acceptance: tests pass, lint clean, build succeeds, no console errors, PWA manif
 
 ## 17. Complete Phase 0–8 Roadmap
 
-- **Phase 0 — Foundation & Documentation (CURRENT):** scaffold, PWA config, docs, AGENTS.md, verification. (In progress/verification.)
-- **Phase 1 — Data Model & Storage:** entities, validation, IndexedDB repos, in-memory fallback, tests.
-- **Phase 2 — Schedule Management UI:** subject/entry CRUD, forms, validation, empty/error states.
-- **Phase 3 — Customization:** days, times, rooms, colors, display options.
-- **Phase 4 — Templates & Theming:** template picker, themes.
-- **Phase 5 — Canvas Rendering & Export:** render, preview, PNG download/share.
-- **Phase 6 — PWA Polish & Offline:** offline verification, installability, caching tuning.
-- **Phase 7 — Accessibility & Responsiveness:** a11y audit, responsive polish, performance.
-- **Phase 8 — Release & QA:** final QA, docs, deploy readiness.
+- **Phase 0 — Project Foundation / Scaffold**
+- **Phase 1 — Data Foundation**
+- **Phase 2 — Schedule Management UI**
+- **Phase 3 — Quick Add Parser**
+- **Phase 4 — Wallpaper Rendering Engine**
+- **Phase 5 — Preview and Export**
+- **Phase 6 — PWA and Offline**
+- **Phase 7 — UX Polish**
+- **Phase 8 — Final QA and Release Readiness**
 
 Do not proceed to next phase without owner authorization.
 
@@ -329,15 +329,18 @@ Stop after phase; wait for owner approval.
 
 ## 22. Current Project Status
 
-- **Phase 0 (Foundation & Documentation):** PASS (verified).
-- **Phase 1 (Data Foundation):** PASS (verified). Data model, validation, reducer, IndexedDB, repository, React hook, autosave, fallback implemented and tested.
-- **Phase 2 (Schedule Management UI):** PASS (verified). Subject/entry CRUD, forms, validation, empty/error states.
-- **Phase 3 (Customization):** PASS (verified). Days, times, rooms, colors, display options via settings panel.
-- **Phase 4 (Templates & Theming):** PASS (verified). Classic grid, compact list, minimal templates with light/dark themes.
-- **Phase 5 (Canvas Rendering & Export):** PASS (verified). Canvas render, preview, PNG download/share.
-- **Implemented:** Phase 0-5. Schedule editor UI, customization, templates, canvas rendering and export.
+- **Phase 0 (Project Foundation / Scaffold):** PASS (verified).
+- **Phase 1 (Data Foundation):** PASS (verified).
+- **Phase 2 (Schedule Management UI):** PASS (verified).
+- **Phase 3 (Quick Add Parser):** PASS (verified). Pure parser + Quick Add modal integrated.
+- **Phase 4 (Wallpaper Rendering Engine):** PASS (verified). Daily List, Weekly Columns, Today Focus; dark/light themes; presets; safe zones.
+- **Phase 5 (Preview and Export):** PASS (verified). Preview + PNG download/share implemented.
+- **Phase 6 (PWA and Offline):** NOT STARTED.
+- **Phase 7 (UX Polish):** NOT STARTED.
+- **Phase 8 (Final QA and Release Readiness):** NOT STARTED.
+- **Implemented:** Phases 0-5 including Quick Add Parser.
 - **Git:** branch main.
-- **Last verified:** Phase 2 correction session (tests/lint/build).
+- **Last verified:** Phase 3 (see section 26).
 
 ## 23. Phase 0 Verification Results
 
@@ -510,6 +513,176 @@ Phase 6 - PWA Polish & Offline (installability, caching, offline verification), 
 - Delete meeting has no separate confirmation.
 - Custom arbitrary colors removed per palette-only spec.
 - Reduced-motion handled via global CSS guard.
+
+---
+
+## 26. Phase 3 Implementation Details
+
+### Parser module
+- Location: `src/lib/quickAddParser.js`
+- Pure JavaScript, no React/storage/IDs.
+- Exports: `parseQuickAdd(input)`, `parseDayToken(token)`.
+- Result contract: `{ success, data, errors, warnings }` where data is `{ name, meetings: [{ days, start, end, room }] }` or null.
+
+### Supported input
+- Subject name + days + time range + optional room.
+- Days: individual names/abbreviations, compact combos (MWF, TTh, MW, TThF), single letters M/T/W/F.
+- Times: 24-hour, compact, 12-hour, mixed with inferred meridiem (with warning).
+- Rooms: `R204`, `Room 204`, `Lab 1`, `Laboratory 2` (normalized).
+
+### Ambiguity rules
+- Standalone `T` = Tuesday; `Th` = Thursday; `TTh` = Tuesday + Thursday.
+- Duplicate days removed; days sorted Mon-Sun.
+- Meridiem inferred only when a valid range results; otherwise error/warning.
+- Times normalized to `HH:mm`.
+
+### UI integration
+- `src/components/QuickAddModal.jsx` added.
+- Entry point "Quick add" button in `ScheduleView`.
+- Review/edit parsed values before save; errors/warnings displayed; original input preserved on failure.
+- "Use manual form" switches to manual SubjectForm.
+- Parsing alone does not mutate state (no save until confirm).
+
+### Tests
+- `src/lib/quickAddParser.test.js` (26 tests).
+- `src/components/quickAdd.test.jsx` (7 tests).
+- Total: 11 test files, 89 tests passed.
+
+### Files created
+- src/lib/quickAddParser.js
+- src/lib/quickAddParser.test.js
+- src/components/QuickAddModal.jsx
+- src/components/quickAdd.test.jsx
+
+### Files modified
+- src/App.jsx
+- src/components/ScheduleView.jsx
+- AGENTS.md
+
+### Test results
+- `npm test`: 11 files, 89 tests passed (PASS).
+- `npm run lint`: no issues (PASS).
+- `npm run build`: success (PASS).
+
+### Known limitations
+- Single meeting per parse; multiple meetings not auto-parsed from one line.
+- Weekday-like words are only treated as days when they form a trailing run; a leading weekday-like word that is part of a subject name is preserved, but ambiguous boundary cases require manual correction.
+- AM/PM inference uses heuristic; ambiguous cases produce warnings rather than silent conversion.
+- Room extraction requires a digit in the room value; unusual room labels without digits are not recognized.
+- Unrecognized trailing text is reported via warnings and may be absorbed into the subject name in some orderings.
+
+### Next authorized phase
+Phase 4 — Wallpaper Rendering Engine, pending owner approval.
+
+---
+
+## 27. Phase 4 Implementation Details
+
+### Module structure
+- src/rendering/wallpaperConstants.js (presets, themes, templates, safe zones)
+- src/rendering/wallpaperUtils.js (scale, roundRect, truncateText, wrapText, safeZonePixels, validateDimensions, colorsFor, groupMeetingsByDay, meetingMinutes)
+- src/rendering/templates/dailyList.js
+- src/rendering/templates/weeklyColumns.js
+- src/rendering/templates/todayFocus.js
+- src/rendering/wallpaperEngine.js (public API)
+- src/rendering/wallpaper.js (backward-compatible facade)
+- src/rendering/wallpaperEngine.test.js
+
+### Public API
+- renderWallpaper(options | (canvas, schedule, settingsOverride)) -> { canvas, width, height, template, theme, warnings }
+- Supports explicit width/height or preset.
+
+### Presets
+- iphone-15: 1179x2556
+- iphone-15-pro-max: 1290x2796
+- android-common: 1080x2400
+- android-tall: 1440x3200
+- Legacy aliases: phone, tablet, desktop.
+
+### Templates
+- dailyList: weekly schedule grouped by day.
+- weeklyColumns: 7-day columns with time axis, overlap handling, fallback to dailyList if too narrow.
+- todayFocus: single day focus with next-class indicator when currentTimeMinutes provided; deterministic fallback selected day.
+
+### Themes
+- dark/light with specified colors.
+
+### Safe zones
+- Default top 16%, bottom 14%; configurable via settings.safeZoneTop/safeZoneBottom.
+
+### Warnings/truncation
+- Returns warnings for space overflow, empty schedule, long title, narrow columns.
+- Text truncation with ellipsis; uses Canvas measureText.
+
+### Tests
+- 12 test files, 115 tests passed.
+- Engine tests: 11 (mocked Canvas context).
+
+### Known limitations
+- Visual verification in real browser not performed (Canvas mocked in tests).
+- No interactive preview/export changes (Phase 5).
+- Font rendering depends on browser.
+- Weekly columns overlap handling is basic track assignment.
+
+### Next authorized phase
+Phase 5 — Preview and Export, pending owner approval.
+
+---
+
+## 28. Phase 4 Final Verification and Correction
+
+### Preset dimensions and aliases
+- iphone-15: 1179x2556 (label includes iPhone 14 Pro)
+- iphone-15-pro-max: 1290x2796
+- android-common: 1080x2400
+- android-tall: 1440x3200
+- Legacy aliases: phone, tablet, desktop -> android-common
+- Custom dimensions validated (200-4096, pixel limit).
+
+### Schedule preservation
+- All seven days accounted for in dailyList and weeklyColumns.
+- Weekend meetings retained.
+- Multiple meetings per day and overlapping meetings handled (basic track assignment).
+- Long subject names truncated with warnings identifying the subject.
+- Missing room and subjects without meetings handled.
+- Renderer does not mutate input schedule (tested).
+- WeeklyColumns fallback to dailyList preserves meetings (delegates).
+
+### Safe-zone verification
+- Default top 16%, bottom 14% applied via safeZonePixels.
+- Content starts after top safe zone and ends before bottom safe zone.
+- Dense schedules return warnings on overflow.
+- Safe-zone visualization separate from layout constraints.
+
+### Browser visual verification
+- No browser-based rendering tool available (only jsdom). NOT performed.
+- Canvas output verified only via mocked Canvas context in tests.
+- Do not claim visual inspection of actual pixels.
+
+### Regression tests added
+- Preset dimensions and alias.
+- Weekend meetings, multiple meetings, overlaps, long names, missing room, subjects without meetings.
+- Safe zone boundaries (settings application).
+
+### Full test results
+- npm test: 12 files, 127 tests passed (PASS).
+
+### Lint result
+- npm run lint: no issues (PASS).
+
+### Production build result
+- npm run build: success (PASS).
+
+### Git status
+- Modified: AGENTS.md, src/rendering/wallpaper.js, templates, utils, engine, tests.
+- No commits created.
+
+### Remaining limitations
+- Visual verification in real browser not performed.
+- Weekly columns overlap handling basic.
+- Font rendering browser-dependent.
+- Truncation warnings now cover subject names, meeting details, title, and semester.
+- Weekly overlap handling basic but all entries represented.
 
 ---
 

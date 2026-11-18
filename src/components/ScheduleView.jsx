@@ -4,6 +4,7 @@ import { EmptyState } from './Modal.jsx'
 export function ScheduleView({
   schedule,
   onAddSubject,
+  onQuickAdd,
   onEditSubject,
   onDeleteSubject,
   onUpdateTitle,
@@ -56,6 +57,15 @@ export function ScheduleView({
           >
             Add subject
           </button>
+          {onQuickAdd ? (
+            <button
+              type="button"
+              onClick={onQuickAdd}
+              className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            >
+              Quick add
+            </button>
+          ) : null}
         </div>
       </div>
 

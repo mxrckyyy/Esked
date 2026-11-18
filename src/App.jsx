@@ -5,6 +5,7 @@ import { validateSubject, validateSchedule } from './lib/model.js'
 import { SAMPLE_SUBJECTS } from './lib/sampleSchedule.js'
 import { ScheduleView } from './components/ScheduleView.jsx'
 import { SubjectForm } from './components/SubjectForm.jsx'
+import { QuickAddModal } from './components/QuickAddModal.jsx'
 import { SettingsPanel } from './components/SettingsPanel.jsx'
 import { PreviewCanvas } from './components/PreviewCanvas.jsx'
 
@@ -18,12 +19,18 @@ export default function App() {
   const { schedule, dispatch, loading, saving, error, storageMode, storageWarning } = useSchedule()
   const [tab, setTab] = useState('schedule')
   const [subjectModal, setSubjectModal] = useState({ open: false, subject: null })
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [formError, setFormError] = useState('')
 
   const openAdd = useCallback(() => {
     setFormError('')
     setSubjectModal({ open: true, subject: null })
   }, [])
+  const openQuickAdd = useCallback(() => {
+    setFormError('')
+    setQuickAddOpen(true)
+  }, [])
+  const closeQuickAdd = useCallback(() => setQuickAddOpen(false), [])
   const openEdit = useCallback((s) => {
     setFormError('')
     setSubjectModal({ open: true, subject: s })
@@ -145,6 +152,7 @@ export default function App() {
           <ScheduleView
             schedule={schedule}
             onAddSubject={openAdd}
+            onQuickAdd={openQuickAdd}
             onEditSubject={openEdit}
             onDeleteSubject={handleDeleteSubject}
             onLoadSample={handleLoadSample}
@@ -174,6 +182,15 @@ export default function App() {
         subject={subjectModal.subject}
         onClose={closeSubject}
         onSubmit={handleSubjectSubmit}
+      />
+      <QuickAddModal
+        open={quickAddOpen}
+        onClose={closeQuickAdd}
+        onSubmit={handleSubjectSubmit}
+        onSwitchToManual={() => {
+          closeQuickAdd()
+          openAdd()
+        }}
       />
     </main>
   )
