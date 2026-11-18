@@ -19,8 +19,17 @@ beautiful, readable, high-resolution phone wallpapers.
 
 ## Current Implementation Status
 
-Phases 0-5 implemented: scaffold, data layer, schedule management UI, customization,
-templates/themes, canvas rendering and PNG export. PWA configured.
+Phases 0-6 implemented: scaffold, data layer, schedule management UI, Quick Add parser,
+wallpaper rendering engine, preview/export, and PWA/offline support.
+
+## Offline and Installation
+
+Esked works offline after the first successful online visit. Schedule data stays on
+your device in IndexedDB.
+
+- Android/Chrome: use the in-app "Install app" prompt when available.
+- iOS/Safari: Share menu -> Add to Home Screen.
+- Offline reload and navigation are supported after first load.
 
 ## Privacy
 

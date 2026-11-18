@@ -1,9 +1,22 @@
-import { WALLPAPER_PRESETS } from '../rendering/wallpaper.js'
+import { useState } from 'react'
+import { WALLPAPER_PRESETS, LEGACY_TEMPLATE_MAP } from '../rendering/wallpaper.js'
+
+const TEMPLATE_OPTIONS = [
+  { value: 'dailyList', label: 'Daily List' },
+  { value: 'weeklyColumns', label: 'Weekly Columns' },
+  { value: 'todayFocus', label: 'Today Focus' },
+]
+
+function normalizeTemplate(t) {
+  return LEGACY_TEMPLATE_MAP[t] || t
+}
 
 export function SettingsPanel({ settings, onChange }) {
+  const [custom, setCustom] = useState(settings.wallpaperPreset === 'custom')
   function set(key, value) {
     onChange({ [key]: value })
   }
+  const templateValue = normalizeTemplate(settings.template)
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold text-slate-900">Customize</h2>
@@ -14,13 +27,15 @@ export function SettingsPanel({ settings, onChange }) {
           </label>
           <select
             id="template"
-            value={settings.template}
+            value={templateValue}
             onChange={(e) => set('template', e.target.value)}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
-            <option value="classic">Classic Grid</option>
-            <option value="compact">Compact List</option>
-            <option value="minimal">Minimal</option>
+            {TEMPLATE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -44,7 +59,11 @@ export function SettingsPanel({ settings, onChange }) {
           <select
             id="preset"
             value={settings.wallpaperPreset}
-            onChange={(e) => set('wallpaperPreset', e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value
+              setCustom(v === 'custom')
+              set('wallpaperPreset', v)
+            }}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
             {Object.entries(WALLPAPER_PRESETS).map(([k, v]) => (
@@ -52,8 +71,37 @@ export function SettingsPanel({ settings, onChange }) {
                 {v.label}
               </option>
             ))}
+            <option value="custom">Custom dimensions</option>
           </select>
         </div>
+        {custom || settings.wallpaperPreset === 'custom' ? (
+          <div className="sm:col-span-2 grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-sm font-medium text-slate-700" htmlFor="custom-w">
+                Width
+              </label>
+              <input
+                id="custom-w"
+                type="number"
+                value={settings.width || ''}
+                onChange={(e) => set('width', Number(e.target.value))}
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700" htmlFor="custom-h">
+                Height
+              </label>
+              <input
+                id="custom-h"
+                type="number"
+                value={settings.height || ''}
+                onChange={(e) => set('height', Number(e.target.value))}
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -82,7 +130,6 @@ export function SettingsPanel({ settings, onChange }) {
           Show safe zones
         </label>
       </div>
-
     </section>
   )
 }

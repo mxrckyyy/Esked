@@ -39,3 +39,8 @@ export async function shareCanvas(canvas, filename = 'esked-wallpaper.png') {
 export function isShareSupported() {
   return typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof navigator.canShare === 'function'
 }
+
+export function sanitizeFilename(title) {
+  const base = (title || 'esked-wallpaper').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return base || 'esked-wallpaper'
+}

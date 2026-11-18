@@ -1,5 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useSchedule } from './hooks/useSchedule.js'
+import { useOnlineStatus } from './hooks/useOnlineStatus.js'
+import { usePwaInstall } from './hooks/usePwaInstall.js'
+import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate.js'
 import { SCHEDULE_ACTIONS } from './lib/scheduleReducer.js'
 import { validateSubject, validateSchedule } from './lib/model.js'
 import { SAMPLE_SUBJECTS } from './lib/sampleSchedule.js'
@@ -8,6 +11,10 @@ import { SubjectForm } from './components/SubjectForm.jsx'
 import { QuickAddModal } from './components/QuickAddModal.jsx'
 import { SettingsPanel } from './components/SettingsPanel.jsx'
 import { PreviewCanvas } from './components/PreviewCanvas.jsx'
+import { OfflineIndicator } from './components/OfflineIndicator.jsx'
+import { InstallPrompt } from './components/InstallPrompt.jsx'
+import { UpdatePrompt } from './components/UpdatePrompt.jsx'
+import { IosInstallInstructions } from './components/IosInstallInstructions.jsx'
 
 const TABS = [
   { id: 'schedule', label: 'Schedule' },
@@ -17,6 +24,9 @@ const TABS = [
 
 export default function App() {
   const { schedule, dispatch, loading, saving, error, storageMode, storageWarning } = useSchedule()
+  const online = useOnlineStatus()
+  const { canInstall, promptInstall } = usePwaInstall()
+  const { updateAvailable, reloadNeeded, update, reload } = useServiceWorkerUpdate()
   const [tab, setTab] = useState('schedule')
   const [subjectModal, setSubjectModal] = useState({ open: false, subject: null })
   const [quickAddOpen, setQuickAddOpen] = useState(false)
@@ -146,6 +156,11 @@ export default function App() {
           </div>
         </div>
       ) : null}
+
+      <OfflineIndicator online={online} />
+      <InstallPrompt canInstall={canInstall} onInstall={promptInstall} />
+      <UpdatePrompt available={updateAvailable} reloadNeeded={reloadNeeded} onUpdate={update} onReload={reload} />
+      <IosInstallInstructions />
 
       <section className="mx-auto max-w-4xl px-4 py-6">
         {tab === 'schedule' ? (

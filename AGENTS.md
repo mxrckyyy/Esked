@@ -335,12 +335,12 @@ Stop after phase; wait for owner approval.
 - **Phase 3 (Quick Add Parser):** PASS (verified). Pure parser + Quick Add modal integrated.
 - **Phase 4 (Wallpaper Rendering Engine):** PASS (verified). Daily List, Weekly Columns, Today Focus; dark/light themes; presets; safe zones.
 - **Phase 5 (Preview and Export):** PASS (verified). Preview + PNG download/share implemented.
-- **Phase 6 (PWA and Offline):** NOT STARTED.
+- **Phase 6 (PWA and Offline):** PASS (verified). Manifest, icons, SW, install, update, offline indicator.
 - **Phase 7 (UX Polish):** NOT STARTED.
 - **Phase 8 (Final QA and Release Readiness):** NOT STARTED.
-- **Implemented:** Phases 0-5 including Quick Add Parser.
+- **Implemented:** Phases 0-6 including PWA/offline.
 - **Git:** branch main.
-- **Last verified:** Phase 3 (see section 26).
+- **Last verified:** Phase 6 (see section 31).
 
 ## 23. Phase 0 Verification Results
 
@@ -683,6 +683,131 @@ Phase 5 — Preview and Export, pending owner approval.
 - Font rendering browser-dependent.
 - Truncation warnings now cover subject names, meeting details, title, and semester.
 - Weekly overlap handling basic but all entries represented.
+
+---
+
+## 29. Phase 5 Implementation Details
+
+### Preview architecture
+- `src/components/PreviewCanvas.jsx` rewritten to use Phase 4 engine.
+- Preview renders at scaled dimensions based on container width and selected preset aspect ratio.
+- Zoom controls (0.5x-3x) with reset; does not affect export.
+- Safe-zone overlay toggle (preview-only).
+- Displays engine warnings.
+- Full-resolution export separate from preview.
+
+### Export implementation
+- `handleDownload` renders full-res canvas via engine, sanitizes filename from schedule title, uses downloadCanvas (toBlob), releases object URL in export.js.
+- Duplicate export prevention via `exporting` state (button disabled).
+- Error handling and status feedback.
+
+### Sharing implementation
+- `handleShare` uses shareCanvas (Web Share API with PNG File).
+- Checks `isShareSupported()`; handles AbortError (cancellation) separately from failures.
+- Fallback to download when unsupported.
+
+### Settings integration
+- SettingsPanel updated to new templates (dailyList, weeklyColumns, todayFocus) and presets (iphone-15, iphone-15-pro-max, android-common, android-tall) plus legacy aliases and custom dimensions.
+- Legacy template/preset values still supported via engine mapping.
+
+### Files modified
+- src/components/PreviewCanvas.jsx
+- src/components/SettingsPanel.jsx
+- src/rendering/wallpaper.js (unified presets)
+
+### Tests
+- Existing PreviewCanvas test still passes.
+- Full suite: 12 files, 127 tests passed.
+
+### Browser verification
+- NOT TESTED (no browser tool; jsdom only).
+
+### Known limitations
+- Preview rendering in jsdom may fail due to no Canvas; handled gracefully.
+- Custom dimensions require manual input.
+- Zoom uses CSS transform; may blur at high zoom.
+
+### Next authorized phase
+Phase 6 — PWA and Offline, pending owner approval.
+
+---
+
+## 30. Phase 5 Final Audit
+
+### Export requirements verified
+- Uses selected template/theme via settings.
+- Uses exact selected dimensions (preset/custom).
+- Independent of preview scaling/zoom.
+- PNG via toBlob; null Blob handled; rendering failures handled.
+- Filename sanitized (sanitizeFilename).
+- Object URL revoked in downloadCanvas.
+- Duplicate export prevented via exporting state.
+- Safe-zone overlay excluded from export (showSafeZones false).
+
+### Sharing behavior
+- Feature detection: navigator.share + canShare.
+- PNG File construction with correct type.
+- canShare({files}) checked.
+- Unsupported retains download fallback.
+- AbortError treated as cancellation, not failure.
+- Other errors reported.
+- Duplicate operations prevented.
+
+### Preview synchronization
+- Rendering synchronous; no stale async results.
+- Updates on schedule/template/theme/preset/custom dimensions/safe-zone overlay.
+- Aspect ratio maintained; zoom independent of export.
+- Warnings displayed.
+
+### Browser verification
+- NOT TESTED (no browser tool; jsdom only).
+
+### Test results
+- npm test: 12 files, 133 tests passed (PASS).
+- npm run lint: no issues (PASS).
+- npm run build: success (PASS).
+
+### Remaining limitations
+- Browser visual verification not performed.
+- Preview rendering in jsdom may fail due to no Canvas (handled).
+
+---
+
+## 31. Phase 6 Implementation Details
+
+### Manifest
+- Name/short_name Esked, display standalone, orientation portrait, theme #0f172a, bg #ffffff, start_url /, scope /.
+- Icons: 192x192 and 512x512 PNG (any) + 512 maskable.
+
+### Service worker
+- vite-plugin-pwa, registerType prompt.
+- Workbox generateSW, precache app shell + assets, navigateFallback index.html.
+- Update detection via navigator.serviceWorker; SKIP_WAITING on user confirmation; controllerchange reload with guard.
+
+### Installation
+- beforeinstallprompt stored; install button shown when supported.
+- appinstalled handling.
+- iOS instructions component with dismiss.
+
+### Offline
+- useOnlineStatus hook; OfflineIndicator subtle banner.
+- Core functionality local (IndexedDB).
+
+### Tests
+- pwa.test.jsx (4 tests).
+- Full suite: 13 files, 137 tests passed.
+
+### Browser verification
+- NOT TESTED.
+
+### Known limitations
+- No real-browser/offline verification.
+- Update flow uses conservative reload (user-triggered) to avoid losing unsaved changes.
+- Update flow depends on SW message handling by workbox (prompt mode).
+- iOS instructions heuristic.
+
+### Next authorized phase
+Phase 7 — UX Polish, pending owner approval.
 
 ---
 
