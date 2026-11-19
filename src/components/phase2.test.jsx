@@ -40,7 +40,6 @@ describe('Phase 2 schedule management', () => {
   })
 
   it('deletes a subject after confirmation', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<App />)
     await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
     fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
@@ -48,6 +47,8 @@ describe('Phase 2 schedule management', () => {
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
     await waitFor(() => expect(screen.getByText('ToDelete')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: /delete subject/i }))
     await waitFor(() => expect(screen.queryByText('ToDelete')).not.toBeInTheDocument())
   })
 

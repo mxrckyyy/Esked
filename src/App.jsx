@@ -10,6 +10,7 @@ import { validateSubject, validateSchedule } from './lib/model.js'
 import { SAMPLE_SUBJECTS } from './lib/sampleSchedule.js'
 import { ScheduleView } from './components/ScheduleView.jsx'
 import { SubjectForm } from './components/SubjectForm.jsx'
+import { Modal } from './components/Modal.jsx'
 import { QuickAddModal } from './components/QuickAddModal.jsx'
 import { SettingsPanel } from './components/SettingsPanel.jsx'
 import { PreviewCanvas } from './components/PreviewCanvas.jsx'
@@ -34,6 +35,7 @@ export default function App() {
   const [subjectModal, setSubjectModal] = useState({ open: false, subject: null })
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [formError, setFormError] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const openAdd = useCallback(() => {
     setFormError('')
@@ -78,9 +80,19 @@ export default function App() {
   }
 
   function handleDeleteSubject(id) {
-    if (window.confirm('Delete this subject?')) {
-      dispatch({ type: SCHEDULE_ACTIONS.DELETE_SUBJECT, payload: id })
+    const subject = (schedule?.subjects || []).find((s) => s.id === id) || null
+    setDeleteTarget(subject ? { id: subject.id, name: subject.name, meetingCount: (subject.meetings || []).length } : { id, name: '', meetingCount: 0 })
+  }
+
+  function confirmDeleteSubject() {
+    if (deleteTarget?.id) {
+      dispatch({ type: SCHEDULE_ACTIONS.DELETE_SUBJECT, payload: deleteTarget.id })
     }
+    setDeleteTarget(null)
+  }
+
+  function cancelDeleteSubject() {
+    setDeleteTarget(null)
   }
 
   function handleLoadSample() {
@@ -99,19 +111,24 @@ export default function App() {
 
   if (loading) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-canvas text-ink">
+      <>
+        <a href="#main" className="skip-link">Skip to main content</a>
+        <main id="main" tabIndex="-1" className="flex min-h-dvh items-center justify-center bg-canvas text-ink">
         <div className="text-center">
           <h1 className="text-xl font-semibold tracking-tight">Esked</h1>
           <p className="mt-2 text-ink-2">Loading…</p>
         </div>
       </main>
+    </>
     )
   }
 
   const scheduleValid = validateSchedule(schedule).valid
 
   return (
-    <main className="min-h-dvh bg-canvas text-ink">
+    <>
+      <a href="#main" className="skip-link">Skip to main content</a>
+      <main id="main" tabIndex="-1" className="min-h-dvh bg-canvas text-ink">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -145,21 +162,21 @@ export default function App() {
 
       {storageWarning ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
+          <div role="status" aria-live="polite" className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
             {storageWarning}
           </div>
         </div>
       ) : null}
       {error ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
+          <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {String(error.message || error)}
           </div>
         </div>
       ) : null}
       {formError ? (
         <div className="mx-auto max-w-4xl px-4 pt-4">
-          <div className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
+          <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {formError}
           </div>
         </div>
@@ -215,6 +232,37 @@ export default function App() {
           openAdd()
         }}
       />
+      <Modal
+        open={!!deleteTarget}
+        title="Delete subject?"
+        onClose={cancelDeleteSubject}
+        describedBy="delete-subject-message"
+        initialFocus="#delete-keep-subject"
+      >
+        <p id="delete-subject-message" className="text-sm text-ink-2">
+          {deleteTarget?.name
+            ? `"${deleteTarget.name}" and its ${deleteTarget.meetingCount} meeting${deleteTarget.meetingCount === 1 ? '' : 's'} will be removed. This cannot be undone.`
+            : 'This subject and its meetings will be removed. This cannot be undone.'}
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            id="delete-keep-subject"
+            onClick={cancelDeleteSubject}
+            className="min-h-[44px] rounded-md border border-line-strong bg-surface px-4 text-sm text-ink-2 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
+          >
+            Keep subject
+          </button>
+          <button
+            type="button"
+            onClick={confirmDeleteSubject}
+            className="min-h-[44px] rounded-md bg-danger px-4 text-sm font-medium text-white hover:bg-danger/90 focus:outline-none focus:ring-2 focus:ring-focus"
+          >
+            Delete subject
+          </button>
+        </div>
+      </Modal>
     </main>
+    </>
   )
 }

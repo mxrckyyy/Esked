@@ -145,6 +145,24 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.skip-link:focus {
+  left: var(--space-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

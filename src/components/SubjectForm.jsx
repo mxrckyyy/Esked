@@ -75,6 +75,8 @@ export function SubjectForm({ open, subject, onClose, onSubmit }) {
             id="subject-name"
             type="text"
             aria-required="true"
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={error ? 'subject-form-error' : undefined}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="mt-1 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
@@ -204,7 +206,7 @@ export function SubjectForm({ open, subject, onClose, onSubmit }) {
           </div>
         </div>
 
-        {error ? <p role="alert" className="text-sm text-danger">{error}</p> : null}
+        {error ? <p id="subject-form-error" role="alert" className="text-sm text-danger">{error}</p> : null}
 
         <div className="flex justify-end gap-2 pt-2">
           <button

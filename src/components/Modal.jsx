@@ -3,7 +3,7 @@
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
 
-export function Modal({ open, title, children, onClose }) {
+export function Modal({ open, title, children, onClose, describedBy, initialFocus }) {
   const dialogRef = useRef(null)
   const previouslyFocused = useRef(null)
 
@@ -14,8 +14,12 @@ export function Modal({ open, title, children, onClose }) {
     if (!dialog) return
 
     const focusables = dialog.querySelectorAll(FOCUSABLE)
-    if (focusables.length) focusables[0].focus()
-    else dialog.focus()
+    let target = focusables.length ? focusables[0] : dialog
+    if (initialFocus) {
+      const preferred = dialog.querySelector(initialFocus)
+      if (preferred) target = preferred
+    }
+    target.focus()
 
     function handleKey(e) {
       if (e.key === 'Escape') {
@@ -51,7 +55,7 @@ export function Modal({ open, title, children, onClose }) {
         previouslyFocused.current.focus()
       }
     }
-  }, [open, onClose])
+  }, [open, onClose, initialFocus])
 
   if (!open) return null
   return (
@@ -60,11 +64,13 @@ export function Modal({ open, title, children, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      aria-describedby={describedBy}
       onClick={onClose}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
+        aria-describedby={describedBy}
         className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-overlay outline-none"
         onClick={(e) => e.stopPropagation()}
       >

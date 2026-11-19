@@ -144,6 +144,7 @@ export function PreviewCanvas({ schedule }) {
           <canvas
             ref={canvasRef}
             className="h-auto max-w-full rounded-lg border border-line"
+            role="img"
             aria-label="Wallpaper preview"
           />
         </div>
@@ -177,8 +178,8 @@ export function PreviewCanvas({ schedule }) {
           </button>
         ) : null}
       </div>
-      {status ? <p className="text-center text-sm text-ink-2">{status}</p> : null}
-      {error ? <p className="text-center text-sm text-danger">{error}</p> : null}
+      <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
+      <p role="alert" className="text-center text-sm text-danger">{error}</p>
       <p className="text-center text-xs text-ink-3">
         Output: {fullW} × {fullH}px
       </p>
