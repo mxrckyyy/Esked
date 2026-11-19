@@ -23,6 +23,16 @@ describe('PreviewCanvas', () => {
     render(<PreviewCanvas schedule={schedule} />)
     expect(screen.getByText(/output:/i)).toBeInTheDocument()
   })
+
+  it('embedded mode hides page-level heading and output info', () => {
+    const schedule = createDefaultSchedule()
+    render(<PreviewCanvas schedule={schedule} embedded />)
+    expect(screen.queryByRole('heading', { name: /preview/i })).not.toBeInTheDocument()
+    expect(screen.queryByText(/your wallpaper is ready/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/output:/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /download png/i })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /wallpaper preview/i })).toBeInTheDocument()
+  })
 })
 
 describe('PreviewCanvas export feedback', () => {

@@ -45,6 +45,7 @@ export default function App() {
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [formError, setFormError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [loadSampleConfirm, setLoadSampleConfirm] = useState(false)
 
   const openAdd = useCallback(() => {
     setFormError('')
@@ -106,12 +107,24 @@ export default function App() {
 
   function handleLoadSample() {
     if (schedule.subjects.length > 0) {
-      if (!window.confirm('Replace the current schedule with sample data?')) return
+      setLoadSampleConfirm(true)
+      return
+    }
+    loadSampleSubjects()
+  }
+
+  function loadSampleSubjects() {
+    if (schedule.subjects.length > 0) {
       dispatch({ type: SCHEDULE_ACTIONS.RESET })
     }
     for (const s of SAMPLE_SUBJECTS) {
       dispatch({ type: SCHEDULE_ACTIONS.ADD_SUBJECT, payload: s })
     }
+    setLoadSampleConfirm(false)
+  }
+
+  function cancelLoadSample() {
+    setLoadSampleConfirm(false)
   }
 
   function handleSettingsChange(changes) {
@@ -216,12 +229,17 @@ export default function App() {
             />
             <div className="hidden space-y-6 lg:block">
               <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
-              {scheduleValid ? <PreviewCanvas schedule={schedule} /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+              {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
             </div>
           </div>
         ) : null}
         {tab === 'customize' ? (
-          <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
+            <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} onSeePreview={() => setTab('preview')} />
+            <div className="hidden space-y-6 lg:block">
+              {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+            </div>
+          </div>
         ) : null}
         {tab === 'preview' ? (
           scheduleValid ? (
@@ -281,6 +299,34 @@ export default function App() {
             className="min-h-[44px] rounded-md bg-danger px-4 text-sm font-medium text-white hover:bg-danger/90 focus:outline-none focus:ring-2 focus:ring-focus"
           >
             Delete subject
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        open={loadSampleConfirm}
+        title="Load sample schedule?"
+        onClose={cancelLoadSample}
+        describedBy="load-sample-message"
+        initialFocus="#load-sample-cancel"
+      >
+        <p id="load-sample-message" className="text-sm text-ink-2">
+          This will replace your current {schedule?.subjects?.length || 0} subject{(schedule?.subjects?.length || 0) === 1 ? '' : 's'} with the sample schedule. This cannot be undone.
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            id="load-sample-cancel"
+            onClick={cancelLoadSample}
+            className="min-h-[44px] rounded-md border border-line-strong bg-surface px-4 text-sm text-ink-2 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
+          >
+            Keep current
+          </button>
+          <button
+            type="button"
+            onClick={loadSampleSubjects}
+            className="min-h-[44px] rounded-md bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-focus"
+          >
+            Load sample
           </button>
         </div>
       </Modal>

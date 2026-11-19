@@ -22,7 +22,7 @@ function presetDims(settings) {
   return map[p] || [1080, 2400]
 }
 
-export function PreviewCanvas({ schedule }) {
+export function PreviewCanvas({ schedule, embedded = false }) {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
   const [status, setStatus] = useState('')
@@ -55,7 +55,6 @@ export function PreviewCanvas({ schedule }) {
         theme: settings.theme,
         settings: previewSettings,
       })
-      // draw rendered canvas into our canvas if different instance
       if (res.canvas !== canvas) {
         canvas.width = previewW
         canvas.height = previewH
@@ -127,7 +126,13 @@ export function PreviewCanvas({ schedule }) {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-ink">Preview</h2>
+      {!embedded ? (
+        <div>
+          <h2 className="text-xl font-bold text-ink">Preview</h2>
+          <p className="mt-1 text-sm text-ink-3">Your wallpaper is ready.</p>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-center gap-3">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={overlay} onChange={(e) => setOverlay(e.target.checked)} />
@@ -140,16 +145,20 @@ export function PreviewCanvas({ schedule }) {
           <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">Reset</button>
         </div>
       </div>
+
       <div ref={containerRef} className="flex justify-center overflow-hidden">
-        <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
-          <canvas
-            ref={canvasRef}
-            className="h-auto max-w-full rounded-lg border border-line"
-            role="img"
-            aria-label="Wallpaper preview"
-          />
+        <div className="w-full max-w-xs rounded-[2rem] border border-line bg-surface-raised p-2 shadow-overlay sm:max-w-sm md:max-w-md">
+          <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
+            <canvas
+              ref={canvasRef}
+              className="h-auto max-w-full rounded-[1.5rem] border border-line"
+              role="img"
+              aria-label="Wallpaper preview"
+            />
+          </div>
         </div>
       </div>
+
       {warnings.length > 0 ? (
         <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
           <ul className="list-disc pl-5">
@@ -181,9 +190,11 @@ export function PreviewCanvas({ schedule }) {
       </div>
       <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
       {error ? <p role="alert" className="text-center text-sm text-danger">{error}</p> : null}
-      <p className="text-center text-xs text-ink-3">
-        Output: {fullW} × {fullH}px
-      </p>
+      {!embedded ? (
+        <p className="text-center text-xs text-ink-3">
+          Output: {fullW} × {fullH}px
+        </p>
+      ) : null}
     </section>
   )
 }

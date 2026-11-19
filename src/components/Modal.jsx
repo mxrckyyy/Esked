@@ -60,7 +60,7 @@ export function Modal({ open, title, children, onClose, describedBy, initialFocu
   if (!open) return null
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -71,7 +71,7 @@ export function Modal({ open, title, children, onClose, describedBy, initialFocu
         ref={dialogRef}
         tabIndex={-1}
         aria-describedby={describedBy}
-        className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-overlay outline-none"
+        className="max-h-[90dvh] w-full overflow-auto rounded-t-2xl bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-overlay outline-none sm:max-w-lg sm:rounded-lg sm:pb-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -84,7 +84,10 @@ export function Modal({ open, title, children, onClose, describedBy, initialFocu
             aria-label="Close dialog"
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-ink-3 hover:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-focus"
           >
-            X
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
         {children}
