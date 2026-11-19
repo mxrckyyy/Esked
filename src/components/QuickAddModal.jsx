@@ -186,7 +186,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                   type="time"
                   value={start}
                   onChange={(e) => setStart(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm text-ink"
+                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm tabular-nums text-ink"
                 />
               </div>
               <div>
@@ -198,7 +198,7 @@ export function QuickAddModal({ open, onClose, onSubmit, onSwitchToManual }) {
                   type="time"
                   value={end}
                   onChange={(e) => setEnd(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm text-ink"
+                  className="mt-1 w-full rounded-md border border-line-strong bg-surface px-2 py-1 text-sm tabular-nums text-ink"
                 />
               </div>
             </div>

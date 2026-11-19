@@ -28,7 +28,7 @@ export function SubjectCard({ subject, onEdit, onDelete }) {
         </div>
       </div>
       {subject.meetings && subject.meetings.length > 0 ? (
-        <ul className="mt-3 space-y-1 text-sm text-ink-2">
+        <ul className="mt-3 space-y-1 text-sm tabular-nums text-ink-2">
           {subject.meetings.map((m) => (
             <li key={m.id}>
               {(m.days || []).join(', ') || 'No days'} · {m.start}–{m.end}

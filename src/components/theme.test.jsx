@@ -24,7 +24,7 @@ describe('Theme toggle', () => {
   it('renders an accessible toggle button', async () => {
     render(<App />)
     await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
-    const toggle = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    const toggle = screen.getAllByRole('button', { name: /switch to (light|dark) mode/i })[0]
     expect(toggle).toBeInTheDocument()
     expect(toggle).toHaveAttribute('aria-pressed')
   })
@@ -32,7 +32,7 @@ describe('Theme toggle', () => {
   it('toggles the application theme class on click', async () => {
     render(<App />)
     await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
-    const toggle = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    const toggle = screen.getAllByRole('button', { name: /switch to (light|dark) mode/i })[0]
     const wasDark = document.documentElement.classList.contains('dark')
     fireEvent.click(toggle)
     await waitFor(() => {
@@ -50,7 +50,7 @@ describe('Theme toggle', () => {
     const before = wallpaperTheme.value
     // toggle app theme
     // find toggle (still in header)
-    const toggle = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    const toggle = screen.getAllByRole('button', { name: /switch to (light|dark) mode/i })[0]
     fireEvent.click(toggle)
     expect(wallpaperTheme.value).toBe(before)
   })

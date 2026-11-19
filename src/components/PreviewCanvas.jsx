@@ -41,7 +41,7 @@ export function PreviewCanvas({ schedule }) {
     const container = containerRef.current
     if (!canvas) return
     const containerWidth = container ? container.clientWidth : 320
-    const baseWidth = Math.max(120, Math.min(containerWidth, 480))
+    const baseWidth = Math.max(120, Math.min(containerWidth, 640))
     const previewW = Math.round(baseWidth)
     const previewH = Math.round(baseWidth * aspect)
     const previewSettings = { ...settings, showSafeZones: overlay }

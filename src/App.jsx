@@ -138,20 +138,27 @@ export default function App() {
       <a href="#main" className="skip-link">Skip to main content</a>
       <main id="main" tabIndex="-1" className="min-h-dvh bg-canvas text-ink">
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold tracking-tight text-ink">Esked</h1>
-            <span className="text-sm text-ink-3">Offline-first schedule wallpapers</span>
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-4">
+          {/* Level 1: brand + theme toggle (always a single row) */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold tracking-tight text-ink">Esked</h1>
+              <span className="hidden text-sm text-ink-3 sm:inline">Offline-first schedule wallpapers</span>
+            </div>
+            <div className="shrink-0 sm:hidden">
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <nav className="flex flex-wrap gap-2" aria-label="Primary">
+          {/* Level 2: segmented nav (full-width on mobile, inline on desktop) */}
+          <div className="flex items-center gap-2 sm:ml-auto sm:w-auto">
+            <nav className="flex flex-1 gap-1 sm:flex-none sm:gap-2" aria-label="Primary">
               {TABS.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => setTab(t.id)}
                   aria-current={tab === t.id ? 'page' : undefined}
-                  className={`min-h-[44px] rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-focus ${
+                  className={`min-h-[44px] flex-1 rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-focus sm:flex-none sm:px-4 ${
                     tab === t.id
                       ? 'bg-accent text-accent-ink'
                       : 'border border-line text-ink-2 hover:bg-surface-raised'
@@ -161,7 +168,7 @@ export default function App() {
                 </button>
               ))}
             </nav>
-            <div className="shrink-0">
+            <div className="hidden shrink-0 sm:block">
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
@@ -169,21 +176,21 @@ export default function App() {
       </header>
 
       {storageWarning ? (
-        <div className="mx-auto max-w-4xl px-4 pt-4">
+        <div className="mx-auto max-w-2xl px-4 pt-4">
           <div role="status" aria-live="polite" className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
             {storageWarning}
           </div>
         </div>
       ) : null}
       {error ? (
-        <div className="mx-auto max-w-4xl px-4 pt-4">
+        <div className="mx-auto max-w-2xl px-4 pt-4">
           <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {String(error.message || error)}
           </div>
         </div>
       ) : null}
       {formError ? (
-        <div className="mx-auto max-w-4xl px-4 pt-4">
+        <div className="mx-auto max-w-2xl px-4 pt-4">
           <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {formError}
           </div>
@@ -195,7 +202,7 @@ export default function App() {
       <UpdatePrompt available={updateAvailable} reloadNeeded={reloadNeeded} onUpdate={update} onReload={reload} enabled={activeNotice === 'update'} />
       <IosInstallInstructions enabled={activeNotice === 'ios'} />
 
-      <section className="mx-auto max-w-4xl px-4 py-6">
+      <section className="mx-auto max-w-2xl px-4 py-6">
         {tab === 'schedule' ? (
           <ScheduleView
             schedule={schedule}
@@ -221,7 +228,7 @@ export default function App() {
         ) : null}
       </section>
 
-      <footer className="mx-auto max-w-4xl px-4 pb-6 text-xs text-ink-3" aria-live="polite">
+      <footer className="mx-auto max-w-2xl px-4 pb-6 text-xs text-ink-3" aria-live="polite">
         {saving ? 'Saving…' : storageMode === 'persistent' ? 'Saved locally' : 'Memory only'}
       </footer>
 

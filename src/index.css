@@ -4,7 +4,7 @@
   color-scheme: light;
 
   /* Font stacks */
-  --font-ui: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: system-ui, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Colors (light) */
@@ -13,12 +13,12 @@
   --surface-raised: #ffffff;
   --ink: #0f172a;
   --ink-2: #475569;
-  --ink-3: #64748b;
+  --ink-3: #475569;
   --line: #e2e8f0;
   --line-strong: #cbd5e1;
   --accent: #0f172a;
   --accent-ink: #ffffff;
-  --focus: #64748b;
+  --focus: #475569;
   --warn: #b45309;
   --danger: #b91c1c;
   --success: #15803d;
