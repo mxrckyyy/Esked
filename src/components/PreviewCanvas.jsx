@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { renderWallpaper } from '../rendering/wallpaperEngine.js'
+import { MIN_DIMENSION } from '../rendering/wallpaperConstants.js'
 import { downloadCanvas, shareCanvas, isShareSupported, sanitizeFilename } from '../rendering/export.js'
 
 function presetDims(settings) {
@@ -41,7 +42,7 @@ export function PreviewCanvas({ schedule }) {
     const container = containerRef.current
     if (!canvas) return
     const containerWidth = container ? container.clientWidth : 320
-    const baseWidth = Math.max(120, Math.min(containerWidth, 640))
+    const baseWidth = Math.max(MIN_DIMENSION, Math.min(containerWidth || MIN_DIMENSION, 640))
     const previewW = Math.round(baseWidth)
     const previewH = Math.round(baseWidth * aspect)
     const previewSettings = { ...settings, showSafeZones: overlay }
@@ -179,7 +180,7 @@ export function PreviewCanvas({ schedule }) {
         ) : null}
       </div>
       <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
-      <p role="alert" className="text-center text-sm text-danger">{error}</p>
+      {error ? <p role="alert" className="text-center text-sm text-danger">{error}</p> : null}
       <p className="text-center text-xs text-ink-3">
         Output: {fullW} × {fullH}px
       </p>

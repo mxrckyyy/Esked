@@ -13,7 +13,7 @@ export function IosInstallInstructions({ enabled = true }) {
   const [dismissed, setDismissed] = useState(false)
   if (!enabled || dismissed || !isIos()) return null
   return (
-    <div className="mx-auto max-w-2xl px-4 pt-2">
+    <div className="app-container pt-2">
       <div className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink-2">
         <div className="flex items-start justify-between gap-2">
           <div>

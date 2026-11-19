@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import 'fake-indexeddb/auto'
 import { resetDbCache } from '../storage/db.js'
@@ -86,7 +86,7 @@ describe('Accessibility', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
     const nameInput = screen.getByLabelText(/name/i)
     expect(nameInput).toHaveAttribute('aria-invalid', 'true')
     expect(nameInput).toHaveAttribute('aria-describedby', 'subject-form-error')
@@ -98,7 +98,7 @@ describe('Accessibility', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Fixed' } })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
@@ -111,7 +111,7 @@ describe('Accessibility', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
   })
 
   it('delete dialog exposes correct semantics and focuses cancel', async () => {
@@ -170,7 +170,7 @@ describe('Accessibility', () => {
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Math' } })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
     await waitFor(() => expect(screen.getByText('Math')).toBeInTheDocument())
-    fireEvent.click(screen.getByRole('button', { name: /preview/i }))
+    fireEvent.click(screen.getAllByRole('button', { name: /^preview$/i })[0])
     await waitFor(() => expect(screen.getByRole('img', { name: /wallpaper preview/i })).toBeInTheDocument())
   })
 

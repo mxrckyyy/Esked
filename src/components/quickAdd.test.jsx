@@ -40,7 +40,7 @@ describe('Quick Add', () => {
     fireEvent.click(screen.getByRole('button', { name: /quick add/i }))
     fireEvent.change(screen.getByLabelText(/schedule text/i), { target: { value: 'garbage' } })
     fireEvent.click(screen.getByRole('button', { name: /parse/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
   })
 
   it('preserves original input on failure', async () => {
@@ -49,7 +49,7 @@ describe('Quick Add', () => {
     fireEvent.click(screen.getByRole('button', { name: /quick add/i }))
     fireEvent.change(screen.getByLabelText(/schedule text/i), { target: { value: 'garbage input' } })
     fireEvent.click(screen.getByRole('button', { name: /parse/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
     expect(screen.getByLabelText(/schedule text/i).value).toBe('garbage input')
   })
 

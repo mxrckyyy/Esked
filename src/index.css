@@ -1,27 +1,52 @@
 @import "tailwindcss";
 
+/* Lato — bundled locally (SIL Open Font License 1.1, see public/fonts/OFL.txt) */
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/Lato-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/Lato-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
 
   /* Font stacks */
-  --font-ui: system-ui, 'Segoe UI', sans-serif;
+  --font-ui: 'Lato', system-ui, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  /* Colors (light) */
-  --canvas: #f8fafc;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --ink: #0f172a;
-  --ink-2: #475569;
-  --ink-3: #475569;
-  --line: #e2e8f0;
-  --line-strong: #cbd5e1;
-  --accent: #0f172a;
-  --accent-ink: #ffffff;
-  --focus: #475569;
-  --warn: #b45309;
-  --danger: #b91c1c;
-  --success: #15803d;
+  /* Colors (light) — approved green identity */
+  --canvas: #F8F8F5;
+  --surface: #FFFFFF;
+  --surface-raised: #FBFBF9;
+  --ink: #1F2933;
+  --ink-2: #374151;
+  --ink-3: #5B6370;
+  --line: #E2E7E3;
+  --line-strong: #D5DAD6;
+  --accent: #129C74;
+  --accent-ink: #0F1412;
+  --accent-dark: #0B7A5A;
+  --accent-tint: #DDF3E8;
+  --accent-icon-bg: #E4F4EC;
+  --focus: #129C74;
+  --warn: #B45309;
+  --danger: #B91C1C;
+  --danger-border: #F0CFCF;
+  --success: #129C74;
+  --chip: #EEF0EE;
+  --safe-fill: #FFF6DB;
+  --safe-stroke: #E0A800;
+  --safe-text: #8A6A00;
 
   /* Spacing (4px base) */
   --space-1: 0.25rem;
@@ -36,18 +61,21 @@
   --space-16: 4rem;
   --space-24: 6rem;
 
-  /* Type scale (major third, 1.25) */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: 1.953rem;
+  /* Type scale (major third-ish, rem-based) */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.8125rem;    /* 13px */
+  --text-base: 0.9375rem;  /* 15px */
+  --text-md: 1rem;         /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.3125rem;    /* 21px */
+  --text-2xl: 1.625rem;    /* 26px */
+  --text-3xl: 2.75rem;     /* 44px */
 
   /* Weights */
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
+  --weight-bold: 700;
 
   /* Line heights */
   --leading-tight: 1.2;
@@ -55,8 +83,10 @@
   --leading-relaxed: 1.6;
 
   /* Radii by role */
-  --radius-container: 0.5rem;
-  --radius-control: 0.375rem;
+  --radius-control: 0.5rem;   /* 8px */
+  --radius-button: 0.625rem;  /* 10px */
+  --radius-container: 1rem;   /* 16px */
+  --radius-dialog: 1.125rem;  /* 18px */
   --radius-badge: 9999px;
 
   /* Focus */
@@ -64,6 +94,7 @@
   --focus-ring-offset: 2px;
 
   /* Elevation */
+  --shadow-card: 0 1px 3px rgba(31, 41, 51, 0.06);
   --shadow-overlay: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.08);
 
   /* Motion */
@@ -74,34 +105,37 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
 
   /* Content widths */
-  --content-narrow: 30rem;
-  --content-default: 48rem;
-  --content-wide: 64rem;
-
-  /* Control heights */
-  --control-sm: 2.25rem;
-  --control-md: 2.5rem;
-  --control-lg: 2.75rem;
-  --target-min: 2.75rem;
+  --content-narrow: 40rem;
+  --content-default: 60rem;
+  --content-wide: 80rem;
 }
 
 .dark {
   color-scheme: dark;
 
-  --canvas: #020617;
-  --surface: #0f172a;
-  --surface-raised: #1e293b;
-  --ink: #f1f5f9;
-  --ink-2: #cbd5e1;
-  --ink-3: #94a3b8;
-  --line: #1e293b;
-  --line-strong: #334155;
-  --accent: #f1f5f9;
-  --accent-ink: #0f172a;
-  --focus: #94a3b8;
+  --canvas: #0F1412;
+  --surface: #171D1A;
+  --surface-raised: #141A17;
+  --ink: #E8EEEA;
+  --ink-2: #B0BAB4;
+  --ink-3: #9AA6A0;
+  --line: #26302B;
+  --line-strong: #34413A;
+  --accent: #22B38A;
+  --accent-ink: #0F1412;
+  --accent-dark: #1a9a74;
+  --accent-tint: #12372C;
+  --accent-icon-bg: #12372C;
+  --focus: #22B38A;
   --warn: #fbbf24;
   --danger: #f87171;
-  --success: #4ade80;
+  --danger-border: #5a2a2a;
+  --success: #22B38A;
+  --chip: #1E2A24;
+  --safe-fill: #2a2410;
+  --safe-stroke: #E0A800;
+  --safe-text: #E0A800;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-overlay: 0 10px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -120,6 +154,8 @@
   --color-warn: var(--warn);
   --color-danger: var(--danger);
   --color-success: var(--success);
+  --font-sans: 'Lato', system-ui, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 html,
@@ -161,6 +197,43 @@ button:focus-visible {
 
 .skip-link:focus {
   left: var(--space-2);
+}
+
+/* Responsive content container per approved spec: 640 / 960 / 1280 / 1360 */
+.app-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .app-container { max-width: 640px; }
+}
+
+@media (min-width: 768px) {
+  .app-container { max-width: 960px; }
+}
+
+@media (min-width: 1024px) {
+  .app-container { max-width: 1280px; }
+}
+
+@media (min-width: 1440px) {
+  .app-container { max-width: 1360px; }
+}
+
+/* Bottom-nav clearance for mobile; removed at md+ */
+.content-with-bottom-nav {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .content-with-bottom-nav {
+    padding-bottom: 1.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

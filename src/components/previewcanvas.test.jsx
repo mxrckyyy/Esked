@@ -82,3 +82,61 @@ describe('PreviewCanvas export feedback', () => {
     expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
   })
 })
+
+describe('PreviewCanvas preview feedback', () => {
+  it('shows engine warnings when returned', async () => {
+    vi.resetModules()
+    vi.doMock('../rendering/wallpaperEngine.js', () => ({
+      renderWallpaper: () => ({ canvas: { toBlob: (cb) => cb(new Blob(['x'], { type: 'image/png' })) }, warnings: ['Schedule has no meetings to render.'] }),
+    }))
+    vi.doMock('../rendering/export.js', () => ({
+      downloadCanvas: vi.fn(),
+      shareCanvas: vi.fn(),
+      isShareSupported: () => false,
+      sanitizeFilename: (t) => t || 'esked',
+    }))
+    const { PreviewCanvas } = await import('./PreviewCanvas.jsx')
+    const { createDefaultSchedule } = await import('../lib/model.js')
+    const schedule = createDefaultSchedule()
+    render(<PreviewCanvas schedule={schedule} />)
+    await waitFor(() => expect(screen.getByText(/schedule has no meetings to render/i)).toBeInTheDocument())
+  })
+
+  it('shows error when render throws', async () => {
+    vi.resetModules()
+    vi.doMock('../rendering/wallpaperEngine.js', () => ({
+      renderWallpaper: () => { throw new Error('render boom') },
+    }))
+    vi.doMock('../rendering/export.js', () => ({
+      downloadCanvas: vi.fn(),
+      shareCanvas: vi.fn(),
+      isShareSupported: () => false,
+      sanitizeFilename: (t) => t || 'esked',
+    }))
+    const { PreviewCanvas } = await import('./PreviewCanvas.jsx')
+    const { createDefaultSchedule } = await import('../lib/model.js')
+    const schedule = createDefaultSchedule()
+    render(<PreviewCanvas schedule={schedule} />)
+    await waitFor(() => expect(screen.getByText(/render boom/i)).toBeInTheDocument())
+  })
+
+  it('updates preview when schedule changes', async () => {
+    vi.resetModules()
+    const renderSpy = vi.fn(() => ({ canvas: { toBlob: (cb) => cb(new Blob(['x'], { type: 'image/png' })) }, warnings: [] }))
+    vi.doMock('../rendering/wallpaperEngine.js', () => ({ renderWallpaper: renderSpy }))
+    vi.doMock('../rendering/export.js', () => ({
+      downloadCanvas: vi.fn(),
+      shareCanvas: vi.fn(),
+      isShareSupported: () => false,
+      sanitizeFilename: (t) => t || 'esked',
+    }))
+    const { PreviewCanvas } = await import('./PreviewCanvas.jsx')
+    const { createDefaultSchedule } = await import('../lib/model.js')
+    const s1 = createDefaultSchedule()
+    const { rerender } = render(<PreviewCanvas schedule={s1} />)
+    const callsBefore = renderSpy.mock.calls.length
+    const s2 = { ...s1, title: 'Changed' }
+    rerender(<PreviewCanvas schedule={s2} />)
+    await waitFor(() => expect(renderSpy.mock.calls.length).toBeGreaterThan(callsBefore))
+  })
+})

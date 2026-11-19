@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import 'fake-indexeddb/auto'
 import { resetDbCache } from '../storage/db.js'
@@ -36,7 +36,7 @@ describe('Phase 2 schedule management', () => {
     await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
     fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
-    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('dialog')).getByRole('alert')).toBeInTheDocument())
   })
 
   it('deletes a subject after confirmation', async () => {

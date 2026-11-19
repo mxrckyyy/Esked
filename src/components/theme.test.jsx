@@ -44,7 +44,7 @@ describe('Theme toggle', () => {
     render(<App />)
     await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
     // switch to customize tab
-    fireEvent.click(screen.getByRole('button', { name: /customize/i }))
+    fireEvent.click(screen.getAllByRole('button', { name: /^customize$/i })[0])
     await waitFor(() => expect(screen.getByLabelText(/theme/i)).toBeInTheDocument())
     const wallpaperTheme = screen.getByLabelText(/theme/i)
     const before = wallpaperTheme.value
