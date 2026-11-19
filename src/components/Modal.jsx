@@ -93,11 +93,22 @@ export function Modal({ open, title, children, onClose, describedBy, initialFocu
   )
 }
 
-export function EmptyState({ title, description, action }) {
+export function EmptyState({ title, description, action, variant = 'default' }) {
+  const isStorageError = variant === 'storage-error'
   return (
-    <div className="mt-6 rounded-lg border border-dashed border-line-strong bg-surface p-8 text-center">
-      <h3 className="text-lg font-semibold text-ink">{title}</h3>
-      <p className="mt-2 text-sm text-ink-2">{description}</p>
+    <div
+      className={
+        isStorageError
+          ? 'mt-6 rounded-lg border border-warn/40 bg-warn/10 p-8 text-center'
+          : 'mt-6 rounded-lg border border-dashed border-line-strong bg-surface p-8 text-center'
+      }
+    >
+      <h3 className={isStorageError ? 'text-lg font-semibold text-warn' : 'text-lg font-semibold text-ink'}>
+        {title}
+      </h3>
+      <p className={isStorageError ? 'mt-2 text-sm text-warn' : 'mt-2 text-sm text-ink-2'}>
+        {description}
+      </p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )

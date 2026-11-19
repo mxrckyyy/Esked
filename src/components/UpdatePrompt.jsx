@@ -1,5 +1,5 @@
-export function UpdatePrompt({ available, reloadNeeded, onUpdate, onReload }) {
-  if (!available && !reloadNeeded) return null
+export function UpdatePrompt({ available, reloadNeeded, onUpdate, onReload, enabled = true }) {
+  if (!enabled || (!available && !reloadNeeded)) return null
   return (
     <div className="mx-auto max-w-4xl px-4 pt-2">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-surface-raised px-3 py-2 text-sm text-ink-2">

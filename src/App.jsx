@@ -31,6 +31,14 @@ export default function App() {
   const { theme, toggle: toggleTheme } = useTheme()
   const { canInstall, promptInstall } = usePwaInstall()
   const { updateAvailable, reloadNeeded, update, reload } = useServiceWorkerUpdate()
+
+  // Non-critical notice priority: at most one non-critical notice at a time.
+  // Critical notices (storage warning, error, form error) are never suppressed.
+  let activeNotice = null
+  if (!online) activeNotice = 'offline'
+  else if (updateAvailable || reloadNeeded) activeNotice = 'update'
+  else if (canInstall) activeNotice = 'install'
+  else if (typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent || '') && /WebKit/.test(navigator.userAgent || '') && window.navigator.standalone !== true) activeNotice = 'ios'
   const [tab, setTab] = useState('schedule')
   const [subjectModal, setSubjectModal] = useState({ open: false, subject: null })
   const [quickAddOpen, setQuickAddOpen] = useState(false)
@@ -182,15 +190,16 @@ export default function App() {
         </div>
       ) : null}
 
-      <OfflineIndicator online={online} />
-      <InstallPrompt canInstall={canInstall} onInstall={promptInstall} />
-      <UpdatePrompt available={updateAvailable} reloadNeeded={reloadNeeded} onUpdate={update} onReload={reload} />
-      <IosInstallInstructions />
+      <OfflineIndicator online={online} enabled={activeNotice === 'offline'} />
+      <InstallPrompt canInstall={canInstall} onInstall={promptInstall} enabled={activeNotice === 'install'} />
+      <UpdatePrompt available={updateAvailable} reloadNeeded={reloadNeeded} onUpdate={update} onReload={reload} enabled={activeNotice === 'update'} />
+      <IosInstallInstructions enabled={activeNotice === 'ios'} />
 
       <section className="mx-auto max-w-4xl px-4 py-6">
         {tab === 'schedule' ? (
           <ScheduleView
             schedule={schedule}
+            storageMode={storageMode}
             onAddSubject={openAdd}
             onQuickAdd={openQuickAdd}
             onEditSubject={openEdit}

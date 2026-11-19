@@ -3,6 +3,7 @@ import { EmptyState } from './Modal.jsx'
 
 export function ScheduleView({
   schedule,
+  storageMode,
   onAddSubject,
   onQuickAdd,
   onEditSubject,
@@ -71,19 +72,27 @@ export function ScheduleView({
 
       <h2 className="text-base font-semibold text-ink">Subjects</h2>
       {schedule.subjects.length === 0 ? (
-        <EmptyState
-          title="No subjects yet"
-          description="Add your first subject and meeting to start building your wallpaper. Schedules are stored locally on this device."
-          action={
-            <button
-              type="button"
-              onClick={onAddSubject}
-              className="min-h-[44px] rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90"
-            >
-              Add subject
-            </button>
-          }
-        />
+        storageMode === 'memory' ? (
+          <EmptyState
+            variant="storage-error"
+            title="Storage unavailable"
+            description="Your schedule is kept in memory only and may be lost if you reload or close this page. Exporting a wallpaper saves an image, not an editable schedule backup."
+          />
+        ) : (
+          <EmptyState
+            title="No subjects yet"
+            description="Add your first subject and meeting to start building your wallpaper. Schedules are stored locally on this device."
+            action={
+              <button
+                type="button"
+                onClick={onAddSubject}
+                className="min-h-[44px] rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90"
+              >
+                Add subject
+              </button>
+            }
+          />
+        )
       ) : (
         <ul className="space-y-3">
           {schedule.subjects.map((s) => (

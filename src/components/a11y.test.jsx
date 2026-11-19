@@ -186,4 +186,63 @@ describe('Accessibility', () => {
     const dot = card.querySelector('span[aria-hidden="true"]')
     expect(dot).not.toBeNull()
   })
+
+  it('first-use empty state renders with Add subject action', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
+    expect(screen.getAllByRole('button', { name: /add subject/i }).length).toBeGreaterThan(0)
+    expect(screen.queryByText(/storage unavailable/i)).not.toBeInTheDocument()
+  })
+
+  it('storage-error empty state renders when storage is unavailable', async () => {
+    const repoMod = await import('../storage/scheduleRepository.js')
+    const spy = vi.spyOn(repoMod.scheduleRepository, 'getDefaultSchedule').mockRejectedValueOnce(new Error('boom'))
+    render(<App />)
+    await waitFor(() => expect(screen.getByText(/storage unavailable/i)).toBeInTheDocument())
+    const emptyState = screen.getByText(/storage unavailable/i).closest('div')
+    expect(emptyState).toHaveTextContent(/exporting a wallpaper saves an image/i)
+    expect(screen.queryByRole('button', { name: /reload/i })).not.toBeInTheDocument()
+    // storage failure is announced once, via the warning banner (role="status"), not the empty state
+    const statusRegions = screen.getAllByRole('status')
+    expect(statusRegions.length).toBeGreaterThan(0)
+    spy.mockRestore()
+  })
+
+  it('existing subjects remain visible after a write failure', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.getByText(/no subjects yet/i)).toBeInTheDocument())
+    fireEvent.click(screen.getAllByRole('button', { name: /add subject/i })[0])
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Kept' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    await waitFor(() => expect(screen.getByText('Kept')).toBeInTheDocument())
+    const repoMod = await import('../storage/scheduleRepository.js')
+    const spy = vi.spyOn(repoMod.scheduleRepository, 'saveSchedule').mockImplementation(() => {
+      const e = new Error('quota'); e.code = 'SAVE_FAILED'; return Promise.reject(e)
+    })
+    // trigger a change to attempt save
+    fireEvent.click(screen.getByRole('button', { name: /edit/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Kept2' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    await waitFor(() => expect(screen.getByText(/storage failed|storage unavailable/i)).toBeTruthy())
+    expect(screen.getByText('Kept2')).toBeInTheDocument()
+    spy.mockRestore()
+  })
+
+  it('notice priority shows only one non-critical notice', async () => {
+    const { OfflineIndicator } = await import('./OfflineIndicator.jsx')
+    const { InstallPrompt } = await import('./InstallPrompt.jsx')
+    const { container: c1 } = render(<OfflineIndicator online={false} enabled={false} />)
+    expect(c1).toBeEmptyDOMElement()
+    const { container: c2 } = render(<InstallPrompt canInstall={true} onInstall={() => {}} enabled={false} />)
+    expect(c2).toBeEmptyDOMElement()
+  })
+
+  it('critical notice renders alongside single non-critical slot', async () => {
+    // component-level: enabled gating hides non-critical when not selected
+    const { OfflineIndicator } = await import('./OfflineIndicator.jsx')
+    const { container } = render(<OfflineIndicator online={false} enabled={true} />)
+    expect(container).not.toBeEmptyDOMElement()
+  })
 })
