@@ -43,7 +43,7 @@ export function BottomNav({ tab, onTabChange }) {
       aria-label="Primary"
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom,0px)] md:hidden"
     >
-      <div className="mx-auto flex max-w-2xl items-center justify-around px-2 pt-2">
+      <div className="mx-auto flex max-w-2xl items-center justify-around px-2 pt-1.5 pb-1">
         {ITEMS.map((item) => {
           const active = tab === item.id
           return (
@@ -52,16 +52,23 @@ export function BottomNav({ tab, onTabChange }) {
               type="button"
               onClick={() => onTabChange(item.id)}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-focus ${
+              className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-md px-3 py-1 text-xs font-medium transition-colors duration-[var(--dur-micro)] focus:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
                 active
                   ? 'text-accent'
                   : 'text-ink-3 hover:text-ink-2'
               }`}
             >
-              <span className={`flex h-6 w-6 items-center justify-center rounded-md ${active ? 'bg-accent-tint text-accent' : ''}`}>
+              {/* Green pill indicator behind icon */}
+              <span
+                className={`flex h-7 items-center justify-center rounded-full px-5 transition-colors duration-[var(--dur-standard)] ${
+                  active ? 'bg-accent-tint text-accent' : ''
+                }`}
+              >
                 {item.icon}
               </span>
-              <span className={active ? 'font-bold' : 'font-medium'}>{item.label}</span>
+              <span className={active ? 'font-bold' : 'font-medium'}>
+                {item.label}
+              </span>
             </button>
           )
         })}

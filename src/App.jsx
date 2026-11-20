@@ -2,12 +2,12 @@ import { useState, useCallback } from 'react'
 import { useSchedule } from './hooks/useSchedule.js'
 import { useOnlineStatus } from './hooks/useOnlineStatus.js'
 import { useTheme } from './hooks/useTheme.js'
-import { ThemeToggle } from './components/ThemeToggle.jsx'
 import { usePwaInstall } from './hooks/usePwaInstall.js'
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate.js'
 import { SCHEDULE_ACTIONS } from './lib/scheduleReducer.js'
 import { validateSubject, validateSchedule } from './lib/model.js'
 import { SAMPLE_SUBJECTS } from './lib/sampleSchedule.js'
+import { AppShell } from './components/AppShell.jsx'
 import { ScheduleView } from './components/ScheduleView.jsx'
 import { SubjectForm } from './components/SubjectForm.jsx'
 import { Modal } from './components/Modal.jsx'
@@ -18,13 +18,6 @@ import { OfflineIndicator } from './components/OfflineIndicator.jsx'
 import { InstallPrompt } from './components/InstallPrompt.jsx'
 import { UpdatePrompt } from './components/UpdatePrompt.jsx'
 import { IosInstallInstructions } from './components/IosInstallInstructions.jsx'
-import { BottomNav } from './components/BottomNav.jsx'
-
-const TABS = [
-  { id: 'schedule', label: 'Schedule' },
-  { id: 'customize', label: 'Customize' },
-  { id: 'preview', label: 'Preview' },
-]
 
 export default function App() {
   const { schedule, dispatch, loading, saving, error, storageMode, storageWarning } = useSchedule()
@@ -148,112 +141,80 @@ export default function App() {
   const scheduleValid = validateSchedule(schedule).valid
 
   return (
-    <>
-      <a href="#main" className="skip-link">Skip to main content</a>
-      <main id="main" tabIndex="-1" className="min-h-dvh bg-canvas text-ink">
-      <header className="border-b border-line bg-surface">
-        <div className="app-container flex items-center justify-between gap-3 py-3 sm:py-4">
-          {/* Brand */}
-          <div className="flex min-w-0 items-center gap-2">
-            <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">Esked</h1>
-            <span className="hidden text-sm text-ink-3 sm:inline">Offline-first schedule wallpapers</span>
-          </div>
-          {/* Desktop navigation + theme toggle */}
-          <div className="hidden items-center gap-3 sm:flex">
-            <nav className="flex items-center gap-1" aria-label="Primary">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTab(t.id)}
-                  aria-current={tab === t.id ? 'page' : undefined}
-                  className={`min-h-[44px] rounded-md px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-focus ${
-                    tab === t.id
-                      ? 'bg-accent text-accent-ink'
-                      : 'border border-line text-ink-2 hover:bg-surface-raised'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </nav>
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          </div>
-          {/* Mobile theme toggle (bottom nav has no toggle) */}
-          <div className="shrink-0 sm:hidden">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          </div>
-        </div>
-      </header>
-
+    <AppShell
+      tab={tab}
+      onTabChange={setTab}
+      theme={theme}
+      onToggleTheme={toggleTheme}
+      saving={saving}
+      storageMode={storageMode}
+    >
+      {/* ── Critical notices (never suppressed) ── */}
       {storageWarning ? (
-        <div className="app-container pt-4">
+        <div className="pt-4">
           <div role="status" aria-live="polite" className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
             {storageWarning}
           </div>
         </div>
       ) : null}
       {error ? (
-        <div className="app-container pt-4">
+        <div className="pt-4">
           <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {String(error.message || error)}
           </div>
         </div>
       ) : null}
       {formError ? (
-        <div className="app-container pt-4">
+        <div className="pt-4">
           <div role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {formError}
           </div>
         </div>
       ) : null}
 
+      {/* ── Non-critical notices (single slot) ── */}
       <OfflineIndicator online={online} enabled={activeNotice === 'offline'} />
       <InstallPrompt canInstall={canInstall} onInstall={promptInstall} enabled={activeNotice === 'install'} />
       <UpdatePrompt available={updateAvailable} reloadNeeded={reloadNeeded} onUpdate={update} onReload={reload} enabled={activeNotice === 'update'} />
       <IosInstallInstructions enabled={activeNotice === 'ios'} />
 
-      <section className="content-with-bottom-nav app-container py-6">
-        {tab === 'schedule' ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
-            <ScheduleView
-              schedule={schedule}
-              storageMode={storageMode}
-              onAddSubject={openAdd}
-              onQuickAdd={openQuickAdd}
-              onEditSubject={openEdit}
-              onDeleteSubject={handleDeleteSubject}
-              onLoadSample={handleLoadSample}
-              onUpdateTitle={(v) => dispatch({ type: SCHEDULE_ACTIONS.UPDATE_TITLE, payload: v })}
-              onUpdateSemester={(v) => dispatch({ type: SCHEDULE_ACTIONS.UPDATE_SEMESTER, payload: v })}
-            />
-            <div className="hidden space-y-6 lg:block">
-              <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
-              {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
-            </div>
+      {/* ── Tab content ── */}
+      {tab === 'schedule' ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
+          <ScheduleView
+            schedule={schedule}
+            storageMode={storageMode}
+            onAddSubject={openAdd}
+            onQuickAdd={openQuickAdd}
+            onEditSubject={openEdit}
+            onDeleteSubject={handleDeleteSubject}
+            onLoadSample={handleLoadSample}
+            onUpdateTitle={(v) => dispatch({ type: SCHEDULE_ACTIONS.UPDATE_TITLE, payload: v })}
+            onUpdateSemester={(v) => dispatch({ type: SCHEDULE_ACTIONS.UPDATE_SEMESTER, payload: v })}
+          />
+          <div className="hidden space-y-6 lg:block">
+            <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
+            {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
           </div>
-        ) : null}
-        {tab === 'customize' ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
-            <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} onSeePreview={() => setTab('preview')} />
-            <div className="hidden space-y-6 lg:block">
-              {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
-            </div>
+        </div>
+      ) : null}
+      {tab === 'customize' ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
+          <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} onSeePreview={() => setTab('preview')} />
+          <div className="hidden space-y-6 lg:block">
+            {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
           </div>
-        ) : null}
-        {tab === 'preview' ? (
-          scheduleValid ? (
-            <PreviewCanvas schedule={schedule} />
-          ) : (
-            <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>
-          )
-        ) : null}
-      </section>
+        </div>
+      ) : null}
+      {tab === 'preview' ? (
+        scheduleValid ? (
+          <PreviewCanvas schedule={schedule} />
+        ) : (
+          <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>
+        )
+      ) : null}
 
-      <footer className="app-container pb-6 text-xs text-ink-3" aria-live="polite">
-        {saving ? 'Saving…' : storageMode === 'persistent' ? 'Saved locally' : 'Memory only'}
-      </footer>
-
+      {/* ── Modals (rendered outside content flow) ── */}
       <SubjectForm
         key={`${subjectModal.open}-${subjectModal.subject?.id ?? 'new'}`}
         open={subjectModal.open}
@@ -270,7 +231,6 @@ export default function App() {
           openAdd()
         }}
       />
-      <BottomNav tab={tab} onTabChange={setTab} />
 
       <Modal
         open={!!deleteTarget}
@@ -330,7 +290,6 @@ export default function App() {
           </button>
         </div>
       </Modal>
-    </main>
-    </>
+    </AppShell>
   )
 }
