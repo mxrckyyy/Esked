@@ -22,9 +22,9 @@ export function AppShell({
         Skip to main content
       </a>
 
-      {/* ── Header ── */}
+      {/* ── Header (56px) ── */}
       <header className="sticky top-0 z-30 border-b border-line bg-surface">
-        <div className="app-container flex h-14 items-center justify-between gap-3">
+        <div className="app-container flex h-14 items-center justify-between gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
           {/* Brand */}
           <div className="flex min-w-0 items-center gap-2">
             <h1 className="text-xl font-semibold tracking-tight text-ink">
@@ -35,30 +35,27 @@ export function AppShell({
             </span>
           </div>
 
-          {/* Desktop navigation + theme toggle (≥768px) */}
-          <div className="hidden items-center gap-3 md:flex">
-            <nav className="flex items-center gap-1" aria-label="Primary">
-              {TABS.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => onTabChange(t.id)}
-                  aria-current={tab === t.id ? 'page' : undefined}
-                  className={`min-h-[44px] rounded-[var(--radius-button)] px-4 text-sm font-medium transition-colors duration-[var(--dur-micro)] focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${
-                    tab === t.id
-                      ? 'bg-accent text-accent-ink'
-                      : 'border border-line text-ink-2 hover:bg-surface-raised'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </nav>
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          </div>
+          {/* Desktop centered navigation (≥768px) */}
+          <nav className="hidden items-center justify-center gap-1 md:flex" aria-label="Primary">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => onTabChange(t.id)}
+                aria-current={tab === t.id ? 'page' : undefined}
+                className={`min-h-[44px] rounded-[var(--radius-button)] px-4 text-sm font-medium transition-colors duration-[var(--dur-micro)] focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${
+                  tab === t.id
+                    ? 'bg-accent text-accent-ink'
+                    : 'border border-line text-ink-2 hover:bg-surface-raised'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
 
-          {/* Mobile theme toggle (<768px) */}
-          <div className="shrink-0 md:hidden">
+          {/* Theme toggle */}
+          <div className="flex justify-end shrink-0">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
@@ -77,7 +74,7 @@ export function AppShell({
 
       {/* ── Footer (≥1024px) ── */}
       <footer
-        className="hidden app-container pb-6 text-xs text-ink-3 lg:block"
+        className="hidden app-container pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-xs text-ink-3 lg:block"
         aria-live="polite"
       >
         {saving

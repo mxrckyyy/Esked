@@ -8,6 +8,7 @@ import { SCHEDULE_ACTIONS } from './lib/scheduleReducer.js'
 import { validateSubject, validateSchedule } from './lib/model.js'
 import { SAMPLE_SUBJECTS } from './lib/sampleSchedule.js'
 import { AppShell } from './components/AppShell.jsx'
+import { Card } from './components/ui/Card.jsx'
 import { ScheduleView } from './components/ScheduleView.jsx'
 import { SubjectForm } from './components/SubjectForm.jsx'
 import { Modal } from './components/Modal.jsx'
@@ -193,8 +194,12 @@ export default function App() {
             onUpdateSemester={(v) => dispatch({ type: SCHEDULE_ACTIONS.UPDATE_SEMESTER, payload: v })}
           />
           <div className="hidden space-y-6 lg:block">
-            <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
-            {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+            <Card className="space-y-6">
+              <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} />
+              <div className="border-t border-line pt-6">
+                {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+              </div>
+            </Card>
           </div>
         </div>
       ) : null}
@@ -202,7 +207,9 @@ export default function App() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.9fr_1fr]">
           <SettingsPanel settings={schedule.settings} onChange={handleSettingsChange} onSeePreview={() => setTab('preview')} />
           <div className="hidden space-y-6 lg:block">
-            {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+            <Card>
+              {scheduleValid ? <PreviewCanvas schedule={schedule} embedded /> : <p className="text-sm text-danger">Fix schedule validation errors before preview.</p>}
+            </Card>
           </div>
         </div>
       ) : null}

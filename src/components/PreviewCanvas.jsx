@@ -1,29 +1,12 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useRef, useState, useCallback, useMemo } from 'react'
 import { renderWallpaper } from '../rendering/wallpaperEngine.js'
-import { MIN_DIMENSION } from '../rendering/wallpaperConstants.js'
 import { downloadCanvas, shareCanvas, isShareSupported, sanitizeFilename } from '../rendering/export.js'
-
-function presetDims(settings) {
-  const p = settings?.wallpaperPreset
-  const map = {
-    'iphone-15': [1179, 2556],
-    'iphone-15-pro-max': [1290, 2796],
-    'android-common': [1080, 2400],
-    'android-tall': [1440, 3200],
-    phone: [1080, 1920],
-    tablet: [1200, 1600],
-    desktop: [1920, 1080],
-  }
-  if (p === 'custom') {
-    const w = Number(settings?.width)
-    const h = Number(settings?.height)
-    if (w > 0 && h > 0) return [w, h]
-  }
-  return map[p] || [1080, 2400]
-}
+import { WeekPreview } from './WeekPreview.jsx'
+import { presetDims } from '../lib/previewUtils.js'
+import { Button } from './ui/Button.jsx'
+import { Card } from './ui/Card.jsx'
 
 export function PreviewCanvas({ schedule, embedded = false }) {
-  const containerRef = useRef(null)
   const canvasRef = useRef(null)
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
@@ -34,39 +17,6 @@ export function PreviewCanvas({ schedule, embedded = false }) {
 
   const settings = useMemo(() => schedule?.settings || {}, [schedule])
   const [fullW, fullH] = presetDims(settings)
-  const aspect = fullH / fullW
-
-  // preview render
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    if (!canvas) return
-    const containerWidth = container ? container.clientWidth : 320
-    const baseWidth = Math.max(MIN_DIMENSION, Math.min(containerWidth || MIN_DIMENSION, 640))
-    const previewW = Math.round(baseWidth)
-    const previewH = Math.round(baseWidth * aspect)
-    const previewSettings = { ...settings, showSafeZones: overlay }
-    try {
-      const res = renderWallpaper({
-        schedule,
-        width: previewW,
-        height: previewH,
-        template: settings.template,
-        theme: settings.theme,
-        settings: previewSettings,
-      })
-      if (res.canvas !== canvas) {
-        canvas.width = previewW
-        canvas.height = previewH
-        const c2 = canvas.getContext('2d')
-        if (c2 && res.canvas) c2.drawImage(res.canvas, 0, 0)
-      }
-      setWarnings(res.warnings || [])
-      setError('')
-    } catch (e) {
-      setError(e.message || 'Render failed')
-    }
-  }, [schedule, settings, overlay, aspect])
 
   const handleDownload = useCallback(async () => {
     if (exporting) return
@@ -124,77 +74,169 @@ export function PreviewCanvas({ schedule, embedded = false }) {
     }
   }, [schedule, settings, exporting])
 
-  return (
-    <section className="space-y-4">
-      {!embedded ? (
-        <div>
-          <h2 className="text-xl font-bold text-ink">Preview</h2>
-          <p className="mt-1 text-sm text-ink-3">Your wallpaper is ready.</p>
-        </div>
-      ) : null}
+  // Shared controls elements
+  const controlsElement = (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm font-medium text-ink select-none">
+        <input
+          type="checkbox"
+          checked={overlay}
+          onChange={(e) => setOverlay(e.target.checked)}
+          className="h-4 w-4 rounded border-line-strong accent-accent"
+        />
+        Safe zones
+      </label>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))}
+          className="flex min-h-[44px] min-w-[36px] items-center justify-center rounded-md border border-line-strong px-2.5 text-sm text-ink-2 hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          -
+        </button>
+        <span className="min-w-12 text-center text-sm tabular-nums text-ink">
+          {Math.round(zoom * 100)}%
+        </span>
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.min(3, z + 0.25))}
+          className="flex min-h-[44px] min-w-[36px] items-center justify-center rounded-md border border-line-strong px-2.5 text-sm text-ink-2 hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom(1)}
+          className="flex min-h-[44px] items-center justify-center rounded-md border border-line-strong px-3 text-sm text-ink-2 hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  )
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={overlay} onChange={(e) => setOverlay(e.target.checked)} />
-          Safe zones
-        </label>
-        <div className="flex items-center gap-1">
-          <button type="button" onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">-</button>
-          <span className="text-sm">{Math.round(zoom * 100)}%</span>
-          <button type="button" onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">+</button>
-          <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] rounded-md border border-line-strong px-3 text-sm">Reset</button>
-        </div>
+  const actionButtons = (
+    <div className="flex flex-wrap justify-center gap-3">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={handleDownload}
+        disabled={exporting}
+        className="w-full sm:w-auto"
+      >
+        {exporting ? 'Generating…' : 'Download PNG'}
+      </Button>
+      {isShareSupported() ? (
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={handleShare}
+          disabled={exporting}
+          className="w-full sm:w-auto"
+        >
+          Share
+        </Button>
+      ) : null}
+    </div>
+  )
+
+  // ── Embedded mode (used inside Schedule & Customize desktop panels) ──
+  if (embedded) {
+    return (
+      <section className="space-y-4">
+        {controlsElement}
+
+        <WeekPreview
+          schedule={schedule}
+          zoom={zoom}
+          showSafeZones={overlay}
+          canvasRef={canvasRef}
+          onWarnings={setWarnings}
+          onError={setError}
+        />
+
+        {warnings.length > 0 ? (
+          <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
+            <ul className="list-disc pl-5">
+              {warnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {actionButtons}
+
+        <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
+        {error ? <p role="alert" className="text-center text-sm text-danger">{error}</p> : null}
+      </section>
+    )
+  }
+
+  // ── Standalone Preview Tab (Mobile & Desktop) ──
+  return (
+    <section className="space-y-6">
+      {/* Mobile Heading (<1024px) */}
+      <div className="lg:hidden">
+        <h2 className="text-xl font-bold text-ink">Preview</h2>
+        <p className="mt-1 text-sm text-ink-3">Your wallpaper is ready.</p>
       </div>
 
-      <div ref={containerRef} className="flex justify-center overflow-hidden">
-        <div className="w-full max-w-xs rounded-[2rem] border border-line bg-surface-raised p-2 shadow-overlay sm:max-w-sm md:max-w-md">
-          <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
-            <canvas
-              ref={canvasRef}
-              className="h-auto max-w-full rounded-[1.5rem] border border-line"
-              role="img"
-              aria-label="Wallpaper preview"
+      {/* Desktop Grid Layout (≥1024px) / Stacked on Mobile */}
+      <div className="lg:grid lg:grid-cols-[1fr_1.3fr] lg:gap-8 lg:items-start">
+        {/* Left Column (Desktop) / Top Controls (Mobile) */}
+        <div className="space-y-6">
+          {/* Big Desktop Heading (≥1024px) */}
+          <div className="hidden lg:block">
+            <h2 className="text-2xl font-bold tracking-tight text-ink lg:text-3xl">Preview</h2>
+            <p className="mt-1 text-sm text-ink-3">Your wallpaper is ready.</p>
+          </div>
+
+          {/* Controls Card */}
+          <Card className="space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-3">
+              Preview controls
+            </h3>
+
+            {controlsElement}
+
+            <p className="text-center text-xs text-ink-3">
+              Output: {fullW} × {fullH}px
+            </p>
+
+            <div className="border-t border-line pt-4">
+              {actionButtons}
+            </div>
+
+            <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
+            {error ? <p role="alert" className="text-center text-sm text-danger">{error}</p> : null}
+
+            {warnings.length > 0 ? (
+              <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
+                <ul className="list-disc pl-5">
+                  {warnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </Card>
+        </div>
+
+        {/* Right Column (Desktop) / Center Mockup (Mobile) */}
+        <div className="flex justify-center pt-2 lg:pt-0">
+          <div className="w-full max-h-[85dvh]">
+            <WeekPreview
+              schedule={schedule}
+              zoom={zoom}
+              showSafeZones={overlay}
+              canvasRef={canvasRef}
+              onWarnings={setWarnings}
+              onError={setError}
             />
           </div>
         </div>
       </div>
-
-      {warnings.length > 0 ? (
-        <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
-          <ul className="list-disc pl-5">
-            {warnings.map((w, i) => (
-              <li key={i}>{w}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      <div className="flex flex-wrap justify-center gap-3">
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={exporting}
-          className="min-h-[44px] w-full rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink hover:bg-accent/90 disabled:opacity-60 sm:w-auto"
-        >
-          {exporting ? 'Generating…' : 'Download PNG'}
-        </button>
-        {isShareSupported() ? (
-          <button
-            type="button"
-            onClick={handleShare}
-            disabled={exporting}
-            className="min-h-[44px] w-full rounded-lg border border-line-strong px-4 text-sm font-medium hover:bg-surface-raised disabled:opacity-60 sm:w-auto"
-          >
-            Share
-          </button>
-        ) : null}
-      </div>
-      <p aria-live="polite" className="text-center text-sm text-ink-2">{status}</p>
-      {error ? <p role="alert" className="text-center text-sm text-danger">{error}</p> : null}
-      {!embedded ? (
-        <p className="text-center text-xs text-ink-3">
-          Output: {fullW} × {fullH}px
-        </p>
-      ) : null}
     </section>
   )
 }
